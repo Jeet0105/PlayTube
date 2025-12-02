@@ -4,6 +4,6 @@ import { verifyUser } from "../middleware/verifyUser.js";
 
 const router = express.Router();
 
-router.get("/current", verifyUser, getCurrentUser);
+router.get("/get-user", verifyUser, getCurrentUser);
 
 export default router;

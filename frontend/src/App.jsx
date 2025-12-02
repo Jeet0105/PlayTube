@@ -5,10 +5,12 @@ import Home from "./pages/Home";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Shorts from "./pages/Shorts/Shorts";
+import GetCurrentUser from "./customHooks/GetCurrentUser";
 
 export const serverUrl = "http://localhost:8000";
 
 function App() {
+  GetCurrentUser();
   return (
     <>
       <Routes>
