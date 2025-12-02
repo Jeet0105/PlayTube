@@ -5,6 +5,7 @@ import cors from "cors";
 import rateLimit from "express-rate-limit";
 import connectDB from "./config/db.js";
 import authRoutes from "./route/auth.route.js";
+import userRoutes from "./route/user.route.js";
 
 dotenv.config();
 
@@ -49,6 +50,7 @@ app.get("/", (req, res) => {
 
 // API routes
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/user", userRoutes);
 
 // Server boot
 const startServer = async () => {
