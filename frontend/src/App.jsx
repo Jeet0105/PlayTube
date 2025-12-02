@@ -4,6 +4,7 @@ import SignIn from "./pages/SignIn";
 import Home from "./pages/Home";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Shorts from "./pages/Shorts/Shorts";
 
 export const serverUrl = "http://localhost:8000";
 
@@ -11,17 +12,14 @@ function App() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Home />}>
+          <Route path="shorts" element={<Shorts />} />
+        </Route>
         <Route path="/signup" element={<SignUp />} />
         <Route path="/signin" element={<SignIn />} />
       </Routes>
 
-      {/* Toastify Renderer */}
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        theme="dark"
-      />
+      <ToastContainer position="top-right" autoClose={3000} theme="dark" />
     </>
   );
 }
