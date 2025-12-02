@@ -4,3 +4,12 @@
 * {
   font-family: "Roboto", sans-serif;
 }
+
+/* Hide scrollbar but keep scroll */
+::-webkit-scrollbar {
+  display: none;
+}
+
+* {
+  scrollbar-width: none; /* Firefox */
+}
