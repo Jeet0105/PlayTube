@@ -6,6 +6,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Shorts from "./pages/Shorts/Shorts";
 import GetCurrentUser from "./customHooks/GetCurrentUser";
+import MobileProfile from "./component/MobileProfile";
 
 export const serverUrl = "http://localhost:8000";
 
@@ -15,6 +16,7 @@ function App() {
     <>
       <Routes>
         <Route path="/" element={<Home />}>
+          <Route path="mobilepro" element={<MobileProfile />} />
           <Route path="shorts" element={<Shorts />} />
         </Route>
         <Route path="/signup" element={<SignUp />} />

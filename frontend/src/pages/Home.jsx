@@ -211,7 +211,7 @@ function Home() {
                     icon={!userData?.profilePictureUrl?<FaUserCircle />: <img src={userData.profilePictureUrl} alt="User" className="w-6 h-6 rounded-full" />}
                     text="You"
                     active={selectedItem === "You"}
-                    onClick={() => setSelectedItem("You")}
+                    onClick={() => {setSelectedItem("You"); navigate("/mobilepro")}}
                 />
             </nav >
         </div >
