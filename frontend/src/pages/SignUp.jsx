@@ -6,6 +6,8 @@ import { serverUrl } from "../App";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { ClipLoader } from "react-spinners";
+import { useDispatch } from "react-redux";
+import { setUserData } from "../redux/userSlice";
 
 function SignUp() {
     const [step, setStep] = useState(1);
@@ -24,6 +26,7 @@ function SignUp() {
     const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const handleImage = (e) => {
         const file = e.target.files[0];
@@ -80,6 +83,7 @@ function SignUp() {
 
             if (res.status === 201) {
                 toast.success("Account created successfully!");
+                dispatch(setUserData(res.data));
                 navigate("/");
             } else {
                 toast.error(res.data.message || "Signup failed");

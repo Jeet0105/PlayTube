@@ -16,14 +16,18 @@ import { IoIosAddCircle } from "react-icons/io";
 import logo from "../../public/logo.png";
 import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import Profile from "../component/Profile";
 
 function Home() {
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [selectedItem, setSelectedItem] = useState("Home");
     const [activeCategory, setActiveCategory] = useState("All");
+    const [profileOpen, setProfileOpen] = useState(false);
 
     const navigate = useNavigate();
     const location = useLocation();
+    const { userData } = useSelector((state) => state.user);
 
     const categories = [
         "All", "Music", "Gaming", "News", "Movies", "Sports", "Learning",
@@ -42,7 +46,7 @@ function Home() {
                     {/* Left */}
                     <div className="flex items-center gap-4">
                         <button
-                            onClick={() => setSidebarOpen(!sidebarOpen)}
+                            onClick={() => setSidebarOpen(prev => !prev)}
                             className="text-xl bg-[#272727] p-2 rounded-full hidden md:flex hover:bg-[#3a3a3a] transition cursor-pointer"
                         >
                             <FaBars />
@@ -74,23 +78,25 @@ function Home() {
                     </div>
 
                     {/* Right */}
-                    <div className="flex items-center gap-4">
-                        <button className="hidden md:flex items-center gap-2 bg-[#272727] px-4 py-2 rounded-full hover:bg-[#3a3a3a] transition cursor-pointer">
-                            <span className="text-lg font-bold">+</span>
-                            <span className="font-medium">Create</span>
-                        </button>
+                    <div className="flex items-center gap-4" onClick={() => setProfileOpen(prev => !prev)}>
+                        {userData?.channel &&
+                            < button className="hidden md:flex items-center gap-2 bg-[#272727] px-4 py-2 rounded-full hover:bg-[#3a3a3a] transition cursor-pointer">
+                                <span className="text-lg font-bold">+</span>
+                                <span className="font-medium">Create</span>
+                            </button>
+                        }
 
-                        <FaUserCircle className="text-3xl hidden md:flex text-gray-300 hover:text-white transition cursor-pointer" />
+                        {!userData?.profilePictureUrl ? <FaUserCircle className="text-3xl hidden md:flex text-gray-300 hover:text-white transition cursor-pointer" /> : <img src={userData?.profilePictureUrl} alt="User" className="w-8 h-8 rounded-full hidden md:flex cursor-pointer" />}
                         <FaSearch className="text-xl md:hidden flex cursor-pointer" />
                     </div>
                 </div>
-            </header>
-
+            </header >
             {/* Sidebar */}
-            <aside
+            < aside
                 className={`bg-[#0f0f0f] border-r border-gray-800 fixed top-16 bottom-0 left-0 z-40
                 hidden md:flex flex-col overflow-y-auto transition-all duration-300
-                ${sidebarOpen ? "w-60" : "w-20"}`}
+                ${sidebarOpen ? "w-60" : "w-20"}`
+                }
             >
                 <nav className="space-y-1 mt-4">
                     <SidebarItem
@@ -133,37 +139,39 @@ function Home() {
                     <SidebarItem icon={<GoVideo />} text="Saved Videos" open={sidebarOpen} selected={selectedItem} setSelected={setSelectedItem} />
                     <SidebarItem icon={<FaThumbsUp />} text="Liked Videos" open={sidebarOpen} selected={selectedItem} setSelected={setSelectedItem} />
                 </nav>
-            </aside>
+            </aside >
 
             {/* Main Content */}
-            <main className={`overflow-y-auto p-4 flex flex-col pb-16 transition-all duration-300
+            < main className={`overflow-y-auto p-4 flex flex-col pb-16 transition-all duration-300
                 ${sidebarOpen ? "md:ml-60" : "md:ml-20"}`}>
 
                 {/* Categories — only on Home */}
-                {location.pathname === "/" && (
-                    <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide pt-2 mt-16">
-                        {categories.map((category) => (
-                            <button
-                                key={category}
-                                onClick={() => setActiveCategory(category)}
-                                className={`px-4 py-1 rounded-lg text-sm whitespace-nowrap transition-all duration-200 
+                {
+                    location.pathname === "/" && (
+                        <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide pt-2 mt-16">
+                            {categories.map((category) => (
+                                <button
+                                    key={category}
+                                    onClick={() => setActiveCategory(category)}
+                                    className={`px-4 py-1 rounded-lg text-sm whitespace-nowrap transition-all duration-200 
                                 ${activeCategory === category
-                                    ? "bg-white text-black"
-                                    : "bg-[#272727] hover:bg-gray-700"}`}
-                            >
-                                {category}
-                            </button>
-                        ))}
-                    </div>
-                )}
-
+                                            ? "bg-white text-black"
+                                            : "bg-[#272727] hover:bg-gray-700"}`}
+                                >
+                                    {category}
+                                </button>
+                            ))}
+                        </div>
+                    )
+                }
+                {profileOpen && <Profile />}
                 <div className="mt-2">
                     <Outlet />
                 </div>
-            </main>
+            </main >
 
             {/* Mobile Bottom Nav */}
-            <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#0f0f0f] border-t border-gray-800 flex justify-around py-2 z-10">
+            < nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#0f0f0f] border-t border-gray-800 flex justify-around py-2 z-10" >
 
                 <MobileSizeNav
                     icon={<FaHome />}
@@ -200,13 +208,13 @@ function Home() {
                 />
 
                 <MobileSizeNav
-                    icon={<FaUserCircle />}
+                    icon={!userData?.profilePictureUrl?<FaUserCircle />: <img src={userData.profilePictureUrl} alt="User" className="w-6 h-6 rounded-full" />}
                     text="You"
                     active={selectedItem === "You"}
                     onClick={() => setSelectedItem("You")}
                 />
-            </nav>
-        </div>
+            </nav >
+        </div >
     );
 }
 

@@ -6,12 +6,15 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import { serverUrl } from "../App";
 import { ClipLoader } from "react-spinners";
+import { useDispatch } from "react-redux";
+import { setUserData } from "../redux/userSlice";
 
 function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
 
   const navigate = useNavigate();
 
@@ -28,6 +31,7 @@ function SignIn() {
     try {
       const res = await axios.post(`${serverUrl}/api/v1/auth/signin`, { email, password }, { withCredentials: true });
       toast.success(res.data.message);
+      dispatch(setUserData(res.data));
       console.log(res.data);
       navigate("/");
     } catch (error) {
