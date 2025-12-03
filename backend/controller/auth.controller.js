@@ -135,3 +135,56 @@ export const signOut = (req, res) => {
         return res.status(500).json({ message: "Internal server error" });
     }
 };
+
+export const googleAuth = async (req, res) => {
+    try {
+        const { username, email, profilePictureUrl } = req.body;
+        const normalizedEmail = email.toLowerCase();
+
+        let googlePhoto = profilePictureUrl;
+
+        if (googlePhoto) {
+            try {
+                googlePhoto = await uploadOnCloudinary(googlePhoto);
+            } catch (err) {
+                console.log("Cloudinary upload error:", err);
+            }
+        }
+
+        let user = await User.findOne({ email: normalizedEmail });
+
+        if (!user) {
+            user = await User.create({
+                username,
+                email: normalizedEmail,
+                profilePictureUrl: googlePhoto,
+            });
+        } else if (!user.profilePictureUrl && googlePhoto) {
+            user.profilePictureUrl = googlePhoto;
+            await user.save();
+        }
+
+        const token = generateToken(user._id);
+
+        return res
+            .status(200)
+            .cookie("token", token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "Strict",
+                maxAge: 24 * 60 * 60 * 1000,
+            })
+            .json({
+                message: "User authenticated with Google successfully",
+                user: {
+                    id: user._id,
+                    username: user.username,
+                    email: user.email,
+                    profilePictureUrl: user.profilePictureUrl,
+                },
+            });
+    } catch (error) {
+        console.error("GoogleAuth Error:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
