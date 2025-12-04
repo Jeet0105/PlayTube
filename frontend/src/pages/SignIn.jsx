@@ -96,7 +96,7 @@ function SignIn() {
           <button onClick={() => navigate("/signup")} className="hover:text-white">
             Create Account
           </button>
-          <button className="hover:text-white">Forgot Password?</button>
+          <button className="hover:text-white" onClick={() => navigate("/forgetpass")}>Forgot Password?</button>
         </div>
       </div>
     </div>
