@@ -8,6 +8,8 @@ import { toast } from "react-toastify";
 import { ClipLoader } from "react-spinners";
 import { useDispatch } from "react-redux";
 import { setUserData } from "../redux/userSlice";
+import PageShell from "../component/PageShell";
+import SurfaceCard from "../component/SurfaceCard";
 
 function SignUp() {
     const [step, setStep] = useState(1);
@@ -104,92 +106,101 @@ function SignUp() {
         setStep((prev) => prev - 1);
     };
 
-    return (
-        <div className="flex justify-center items-center min-h-screen bg-[#181818]">
-            <div className="bg-[#202124] rounded-2xl p-10 w-full max-w-md shadow-lg">
+    const headings = {
+        1: "Create your PlayTube identity",
+        2: "Secure your account",
+        3: "Add your avatar",
+    };
 
-                {/* Header */}
-                <div className="flex items-center mb-6">
-                    <button className="text-gray-300 mr-3 hover:text-white" onClick={prevStep}>
-                        <FaArrowLeft size={20} />
+    const descriptions = {
+        1: "Tell us a little about yourself so we can personalize your feed.",
+        2: "Protect your channel with a strong password.",
+        3: "Upload a profile picture to finish setting things up.",
+    };
+
+    const inputClasses =
+        "w-full bg-[#1c1c1c] border border-white/10 rounded-2xl px-4 py-3 text-white placeholder:text-gray-400 focus:border-orange-500 focus:outline-none transition";
+
+    return (
+        <PageShell contentClassName="flex items-center justify-center min-h-screen">
+            <SurfaceCard
+                size="sm"
+                heading={headings[step]}
+                subheading={descriptions[step]}
+            >
+                <div className="flex justify-between items-center text-gray-400 text-sm">
+                    <div className="flex items-center gap-2 font-semibold text-white/80">
+                        <img src={logo} alt="logo" className="w-7" />
+                        Step {step} of 3
+                    </div>
+                    <button className="hover:text-white flex items-center gap-2" onClick={prevStep}>
+                        <FaArrowLeft />
+                        {step === 1 ? "Back to Sign In" : "Back"}
                     </button>
-                    <span className="text-white text-2xl font-medium flex-1">Create Account</span>
                 </div>
 
-                {/* STEP 1 */}
                 {step === 1 && (
-                    <>
-                        <h1 className="text-white text-3xl font-normal mb-2 flex items-center gap-2">
-                            <img src={logo} alt="logo" className="w-8" />
-                            Basic Info
-                        </h1>
-
+                    <div className="space-y-5">
                         <input
                             type="text"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             placeholder="Username"
-                            className="w-full bg-transparent border border-gray-500 rounded-md px-3 py-3 text-white focus:border-orange-500 mb-4"
+                            className={inputClasses}
                         />
 
                         <input
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            placeholder="Email"
-                            className="w-full bg-transparent border border-gray-500 rounded-md px-3 py-3 text-white focus:border-orange-500 mb-4"
+                            placeholder="Email address"
+                            className={inputClasses}
                         />
 
                         <button
-                            className="mt-6 w-full bg-orange-600 hover:bg-orange-700 transition text-white py-3 rounded-lg"
+                            className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:opacity-90 text-white py-3 rounded-2xl font-semibold transition"
                             onClick={nextStep}
                         >
-                            Next
+                            Continue
                         </button>
-                    </>
+                    </div>
                 )}
 
-                {/* STEP 2 */}
                 {step === 2 && (
-                    <>
-                        <h1 className="text-white text-3xl font-normal mb-2 flex items-center gap-2">
-                            <img src={logo} alt="logo" className="w-8" />
-                            Security
-                        </h1>
-
-                        <div className="flex items-center bg-[#3c4043] text-white px-3 py-2 rounded-full w-fit mb-6">
-                            <FaUserCircle size={24} className="mr-2" />
-                            {email}
+                    <div className="space-y-5">
+                        <div className="flex items-center gap-2 bg-[#1c1c1c] border border-white/10 rounded-2xl px-4 py-3">
+                            <FaUserCircle className="text-xl text-orange-300" />
+                            <span className="text-sm text-gray-300 truncate">{email}</span>
                         </div>
 
-                        <div className="relative mb-4">
+                        <div className="relative">
                             <input
                                 type={showPassword ? "text" : "password"}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 placeholder="Password"
-                                className="w-full bg-transparent border border-gray-500 rounded-md px-3 py-3 text-white"
+                                className={`${inputClasses} pr-12`}
                             />
                             <button
                                 type="button"
-                                className="absolute right-3 top-3 text-gray-400 hover:text-white"
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
                                 onClick={() => setShowPassword(!showPassword)}
                             >
                                 {showPassword ? <FaEyeSlash /> : <FaEye />}
                             </button>
                         </div>
 
-                        <div className="relative mb-4">
+                        <div className="relative">
                             <input
                                 type={showConfirmPassword ? "text" : "password"}
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 placeholder="Confirm Password"
-                                className="w-full bg-transparent border border-gray-500 rounded-md px-3 py-3 text-white"
+                                className={`${inputClasses} pr-12`}
                             />
                             <button
                                 type="button"
-                                className="absolute right-3 top-3 text-gray-400 hover:text-white"
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
                                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                             >
                                 {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
@@ -197,23 +208,18 @@ function SignUp() {
                         </div>
 
                         <button
-                            className="mt-6 w-full bg-orange-600 hover:bg-orange-700 transition text-white py-3 rounded-lg"
+                            className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:opacity-90 text-white py-3 rounded-2xl font-semibold transition"
                             onClick={nextStep}
                         >
-                            Next
+                            Continue
                         </button>
-                    </>
+                    </div>
                 )}
 
-                {/* STEP 3 */}
                 {step === 3 && (
-                    <>
-                        <h1 className="text-white text-3xl font-normal mb-6 text-center">
-                            Choose Avatar
-                        </h1>
-
-                        <div className="flex flex-col items-center gap-6">
-                            <div className="w-28 h-28 rounded-full border-4 border-gray-500 overflow-hidden shadow-lg flex items-center justify-center">
+                    <div className="space-y-6">
+                        <div className="flex flex-col items-center gap-4">
+                            <div className="w-28 h-28 rounded-full border border-white/15 bg-[#1c1c1c] overflow-hidden flex items-center justify-center">
                                 {frontendImage ? (
                                     <img
                                         src={frontendImage}
@@ -221,43 +227,41 @@ function SignUp() {
                                         className="w-full h-full object-cover"
                                     />
                                 ) : (
-                                    <FaUserCircle className="text-gray-400 w-full h-full p-2" />
+                                    <FaUserCircle className="text-5xl text-gray-500" />
                                 )}
                             </div>
-
-                            <div className="flex flex-col gap-2 w-full">
-                                <label className="text-gray-300 font-medium">Choose Profile Picture</label>
-
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    className="block w-full text-gray-400
-                                        file:mr-4 file:py-2 file:px-4
-                                        file:rounded-full file:border-0
-                                        file:text-sm file:font-semibold
-                                        file:bg-orange-600 file:text-white
-                                        hover:file:bg-orange-700
-                                        cursor-pointer"
-                                    onChange={handleImage}
-                                />
-                            </div>
+                            <p className="text-sm text-gray-400 text-center">
+                                Upload a crisp square image for best results.
+                            </p>
                         </div>
 
+                        <label className="block">
+                            <span className="text-sm text-gray-300 font-medium">
+                                Profile picture
+                            </span>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className="mt-2 block w-full text-gray-300 file:mr-4 file:py-2.5 file:px-6 file:rounded-2xl file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20 cursor-pointer"
+                                onChange={handleImage}
+                            />
+                        </label>
+
                         <button
-                            className="mt-6 w-full bg-green-600 hover:bg-green-700 transition text-white py-3 rounded-lg flex justify-center items-center"
+                            className="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-2xl font-semibold transition flex justify-center items-center"
                             onClick={handleSubmit}
                             disabled={loading}
                         >
                             {loading ? (
-                                <ClipLoader size={22} color="black" />
+                                <ClipLoader size={22} color="white" />
                             ) : (
                                 "Create Account"
                             )}
                         </button>
-                    </>
+                    </div>
                 )}
-            </div>
-        </div>
+            </SurfaceCard>
+        </PageShell>
     );
 }
 
