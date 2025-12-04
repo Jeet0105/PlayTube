@@ -18,6 +18,7 @@ import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Profile from "../component/Profile";
+import PageShell from "../component/PageShell";
 
 function Home() {
     const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -37,7 +38,8 @@ function Home() {
     ];
 
     return (
-        <div className="bg-[#0f0f0f] text-white min-h-screen relative">
+        <PageShell variant="app" padded={false} className="text-white">
+        <div className="relative min-h-screen">
 
             {/* Header */}
             <header className="bg-[#0f0f0f] h-16 px-4 border-b border-gray-800 fixed top-0 left-0 right-0 z-50">
@@ -215,6 +217,7 @@ function Home() {
                 />
             </nav >
         </div >
+        </PageShell>
     );
 }
 
