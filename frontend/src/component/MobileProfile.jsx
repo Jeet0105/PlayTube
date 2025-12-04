@@ -1,4 +1,4 @@
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import { FiLogOut } from "react-icons/fi";
 import { MdOutlineSwitchAccount } from "react-icons/md";
 import { FcGoogle } from "react-icons/fc";
@@ -10,9 +10,57 @@ import {
     FaThumbsUp,
 } from "react-icons/fa";
 import { GoVideo } from "react-icons/go";
+import { toast } from "react-toastify";
+import axios from "axios";
+import { signInWithPopup } from "firebase/auth";
+import { auth, provider } from "../../utils/firebase";
+import { serverUrl } from "../App";
+import { setUserData } from "../redux/userSlice";
+import { useNavigate } from "react-router-dom";
 
 function MobileProfile() {
     const { userData } = useSelector((state) => state.user);
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+
+    const handleSignOut = async () => {
+        try {
+            const res = await axios.get(`${serverUrl}/api/v1/auth/signout`, { withCredentials: true });
+            if (res.status === 200) {
+                toast.success("Signed out successfully.");
+                dispatch(setUserData(null));
+            } else {
+                toast.error("Failed to sign out. Please try again.");
+            }
+        } catch (error) {
+            toast.error("Failed to sign out. Please try again.");
+            console.error("Error signing out:", error);
+        }
+    };
+
+    const handleGoogleAuth = async () => {
+        try {
+            const res = await signInWithPopup(auth, provider);
+            const { displayName, email, photoURL } = res.user;
+
+            const userData = {
+                username: displayName,
+                email: email,
+                profilePictureUrl: photoURL,
+            };
+            const response = await axios.post(`${serverUrl}/api/v1/auth/googleauth`, userData, { withCredentials: true });
+            if (response.status === 200) {
+                toast.success("Signed in with Google successfully.");
+                dispatch(setUserData(response.data.user));
+            } else {
+                toast.error("Google sign-in failed. Please try again.");
+            }
+        } catch (error) {
+            toast.error("Google sign-in failed. Please try again.");
+            console.error("Error during Google sign-in:", error);
+        }
+    }
+
     return (
         <div className="md:hidden bg-[#0f0f0f] text-white min-h-screen flex flex-col pt-16 p-2.5">
             {userData && (
@@ -34,24 +82,28 @@ function MobileProfile() {
             <div className="flex gap-2 p-4 border-b border-gray-800 overflow-auto">
                 <button 
                     className="bg-gray-800 text-nowrap px-3 py-1 rounded-2xl text-sm flex items-center justify-center gap-2"
+                    onClick={handleGoogleAuth}
                 >
                     <FcGoogle className="text-xl"/>SignIn With Google Account
                 </button>
 
                 <button 
                     className="bg-gray-800 text-nowrap px-3 py-1 rounded-2xl text-sm flex items-center justify-center gap-2"
+                    onClick={()=>navigate('/signup')}
                 >
                     <TiUserAddOutline className="text-xl"/>Create New Account
                 </button>
 
                 <button 
                     className="bg-gray-800 text-nowrap px-3 py-1 rounded-2xl text-sm flex items-center justify-center gap-2"
+                    onClick={()=>navigate('/signin')}
                 >
                     <MdOutlineSwitchAccount className="text-xl"/>SignIn With Other account
                 </button>
 
                 <button 
                     className="bg-gray-800 text-nowrap px-3 py-1 rounded-2xl text-sm flex items-center justify-center gap-2"
+                    onClick={handleSignOut}
                 >
                     <FiLogOut className="text-xl"/>Sign Out
                 </button>

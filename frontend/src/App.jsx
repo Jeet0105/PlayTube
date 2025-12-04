@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import Shorts from "./pages/Shorts/Shorts";
 import GetCurrentUser from "./customHooks/GetCurrentUser";
 import MobileProfile from "./component/MobileProfile";
+import ForgetPassword from "./pages/ForgetPassword";
 
 export const serverUrl = "http://localhost:8000";
 
@@ -21,6 +22,7 @@ function App() {
         </Route>
         <Route path="/signup" element={<SignUp />} />
         <Route path="/signin" element={<SignIn />} />
+        <Route path="/forgetpass" element={<ForgetPassword />} />
       </Routes>
 
       <ToastContainer position="top-right" autoClose={3000} theme="dark" />
