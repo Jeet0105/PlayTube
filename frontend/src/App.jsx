@@ -8,6 +8,8 @@ import Shorts from "./pages/Shorts/Shorts";
 import GetCurrentUser from "./customHooks/GetCurrentUser";
 import MobileProfile from "./component/MobileProfile";
 import ForgetPassword from "./pages/ForgetPassword";
+import CreateChannel from "./pages/Channel/CreateChannel";
+import ViewChannel from "./pages/Channel/ViewChannel";
 
 export const serverUrl = "http://localhost:8000";
 
@@ -19,13 +21,15 @@ function App() {
         <Route path="/" element={<Home />}>
           <Route path="mobilepro" element={<MobileProfile />} />
           <Route path="shorts" element={<Shorts />} />
+          <Route path="viewchannel" element={<ViewChannel />} />
         </Route>
         <Route path="/signup" element={<SignUp />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/forgetpass" element={<ForgetPassword />} />
+        <Route path="/createchannel" element={<CreateChannel />} />
       </Routes>
 
-      <ToastContainer position="top-right" autoClose={3000} theme="dark" />
+      <ToastContainer position="top-right" autoClose={2000} theme="dark" />
     </>
   );
 }

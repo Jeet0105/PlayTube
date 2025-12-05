@@ -86,7 +86,7 @@ function SignUp() {
             if (res.status === 201) {
                 toast.success("Account created successfully!");
                 dispatch(setUserData(res.data));
-                navigate("/");
+                navigate("/signin");
             } else {
                 toast.error(res.data.message || "Signup failed");
             }
