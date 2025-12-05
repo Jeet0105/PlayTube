@@ -73,7 +73,7 @@ function MobileProfile() {
                     <div className="flex flex-col">
                         <span className="font-semibold text-lg">@{userData?.username}</span>
                         <span className="text-gray-400 text-sm">{userData?.email}</span>
-                        <p className="text-sm text-blue-400 cursor-pointer hover:underline">{userData?.channel ? "View Channel" : "Create Channel"}</p>
+                        <p className="text-sm text-blue-400 cursor-pointer hover:underline" onClick={()=>{userData?.channel ? navigate("/viewchannel") : navigate("/createchannel")}}>{userData?.channel ? "View Channel" : "Create Channel"}</p>
                     </div>
                 </div>
             )}

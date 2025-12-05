@@ -52,12 +52,16 @@ export const createChannel = async (req, res) => {
         if (req.files?.avatar?.[0]?.path) {
             const uploaded = await uploadOnCloudinary(req.files.avatar[0].path);
             avatar = uploaded?.url || "";
+            console.log(avatar);
+            
         }
 
         // Upload banner
         if (req.files?.banner?.[0]?.path) {
             const uploaded = await uploadOnCloudinary(req.files.banner[0].path);
             banner = uploaded?.url || "";
+            console.log(banner);
+            
         }
 
         const channel = await Channel.create({
@@ -70,15 +74,16 @@ export const createChannel = async (req, res) => {
         });
 
         // Update the user with channel details
-        await User.findByIdAndUpdate(
-            req.userId,
-            {
-                channel: channel._id,
-                username: name,
-                profilePictureUrl: avatar,
-            },
-            { new: true }
-        );
+        const updateData = {
+            channel: channel._id,
+            username: name,
+        };
+
+        if (avatar) {
+            updateData.profilePictureUrl = avatar;
+        }
+
+        await User.findByIdAndUpdate(req.userId, updateData, { new: true });
 
         return res.status(201).json({
             message: "Channel created successfully.",
