@@ -33,7 +33,7 @@ function SignIn() {
     try {
       const res = await axios.post(`${serverUrl}/api/v1/auth/signin`, { email, password }, { withCredentials: true });
       toast.success(res?.data?.message);
-      dispatch(setUserData(res.data));
+      dispatch(setUserData(res.data.user));
       console.log(res.data);
       navigate("/");
     } catch (error) {

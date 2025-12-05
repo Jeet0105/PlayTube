@@ -58,28 +58,72 @@ function Profile() {
 
     return (
         <div>
-            <div className='absolute right-5 top-10 mt-2 w-72 bg-[#212121] text-white rounded-xl shadow-lg z-50 hidden md:flex flex-col'>
+            <div className='absolute right-5 top-10 mt-2 w-80 bg-[#111111]/95 backdrop-blur-xl border border-white/5 text-white rounded-2xl shadow-[0_18px_45px_rgba(0,0,0,0.65)] z-50 hidden md:flex flex-col overflow-hidden'>
                 {userData && (
-                    <div className='flex items-center gap-3 p-4 border-b border-gray-700'>
-                        <img src={userData?.profilePictureUrl} alt="Profile" className="w-12 h-12 rounded-full flex items-center justify-center object-cover border-2" />
-                        <div>
-                            <h4 className='font-semibold'>{userData?.username}</h4>
-                            <p className='text-sm text-gray-400'>{userData?.email}</p>
-                            <p 
-                                className='text-sm text-blue-400 cursor-pointer hover:underline'
+                    <div className='flex items-center gap-3 p-4 border-b border-white/10 bg-[#1c1c1c]/50'>
+                        <div className="w-12 h-12 rounded-full border-2 border-white/10 overflow-hidden flex items-center justify-center">
+                            <img 
+                                src={userData?.profilePictureUrl} 
+                                alt="Profile" 
+                                className="w-full h-full object-cover" 
+                            />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <h4 className='font-semibold truncate'>{userData?.username}</h4>
+                            <p className='text-sm text-gray-400 truncate'>{userData?.email}</p>
+                            <button
+                                className='text-sm text-orange-400 hover:text-orange-300 transition mt-1'
                                 onClick={()=>{userData?.channel ? navigate("/viewchannel") : navigate("/createchannel")}}
                             >
                                 {userData?.channel ? 'View Channel' : 'Create Channel'}
-                            </p>
+                            </button>
                         </div>
                     </div>
                 )}
                 <div className='flex flex-col py-2'>
-                    <button className='flex items-center gap-3 px-4 py-2 hover:bg-gray-700 rounded-lg transition cursor-pointer' onClick={handleGoogleAuth}><FcGoogle className='text-xl'/> Sign in with Google</button>
-                    <button className='flex items-center gap-3 px-4 py-2 hover:bg-gray-700 rounded-lg transition cursor-pointer' onClick={() => navigate("/signup")}><TiUserAddOutline className='text-xl' /> Create New Account</button>
-                    <button className='flex items-center gap-3 px-4 py-2 hover:bg-gray-700 rounded-lg transition cursor-pointer' onClick={() => navigate("/signin")}><MdOutlineSwitchAccount className='text-xl' /> Sign in with Other Account</button>
-                    {userData?.channel && <button className='flex items-center gap-3 px-4 py-2 hover:bg-gray-700 rounded-lg transition cursor-pointer'><SiYoutubestudio className='text-xl text-orange-500' /> PT Studio</button>}
-                    {userData && <button className='flex items-center gap-3 px-4 py-2 hover:bg-gray-700 rounded-lg transition cursor-pointer' onClick={handleSignOut}><FiLogOut className='text-xl' /> Sign Out</button>}
+                    {!userData && (
+                        <>
+                            <button 
+                                className='flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition cursor-pointer text-left' 
+                                onClick={handleGoogleAuth}
+                            >
+                                <FcGoogle className='text-xl'/>
+                                <span>Sign in with Google</span>
+                            </button>
+                            <button 
+                                className='flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition cursor-pointer text-left' 
+                                onClick={() => navigate("/signup")}
+                            >
+                                <TiUserAddOutline className='text-xl' />
+                                <span>Create New Account</span>
+                            </button>
+                            <button 
+                                className='flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition cursor-pointer text-left' 
+                                onClick={() => navigate("/signin")}
+                            >
+                                <MdOutlineSwitchAccount className='text-xl' />
+                                <span>Sign in with Other Account</span>
+                            </button>
+                        </>
+                    )}
+                    {userData && (
+                        <>
+                            {userData?.channel && (
+                                <button className='flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition cursor-pointer text-left'>
+                                    <SiYoutubestudio className='text-xl text-orange-500' />
+                                    <span>PT Studio</span>
+                                </button>
+                            )}
+                            <div className="h-px w-full bg-white/10 my-1" />
+                            <button 
+                                className='flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition cursor-pointer text-left text-red-400 hover:text-red-300' 
+                                onClick={handleSignOut}
+                            >
+                                <FiLogOut className='text-xl' />
+                                <span>Sign Out</span>
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
         </div>

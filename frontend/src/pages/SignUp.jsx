@@ -77,15 +77,11 @@ function SignUp() {
         formData.append("profilePicture", backendImage);
 
         try {
-            const res = await axios.post(`${serverUrl}/api/v1/auth/signup`, formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
+            const res = await axios.post(`${serverUrl}/api/v1/auth/signup`, formData);
 
             if (res.status === 201) {
                 toast.success("Account created successfully!");
-                dispatch(setUserData(res.data));
+                dispatch(setUserData(res.data.user));
                 navigate("/signin");
             } else {
                 toast.error(res.data.message || "Signup failed");
