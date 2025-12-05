@@ -1,21 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import logo from "../../../public/logo.png";
-import { useSelector } from "react-redux";
-import { FaUserCircle } from "react-icons/fa";
+import { FaUserCircle, FaArrowLeft } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { serverUrl } from "../../App";
 import { ClipLoader } from "react-spinners";
+import PageShell from "../../component/PageShell";
+import SurfaceCard from "../../component/SurfaceCard";
 
 function CreateChannel() {
-    const { userData } = useSelector((state) => state.user);
-
     const [step, setStep] = useState(1);
 
     const [avatar, setAvatar] = useState(null);
     const [banner, setBanner] = useState(null);
-
     const [channelName, setChannelName] = useState("");
     const [description, setDescription] = useState("");
     const [category, setCategory] = useState("");
@@ -23,20 +21,6 @@ function CreateChannel() {
     const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
-
-    const handleAvatar = (e) => {
-        if (e.target.files?.[0]) setAvatar(e.target.files[0]);
-    };
-
-    const handleBanner = (e) => {
-        if (e.target.files?.[0]) setBanner(e.target.files[0]);
-    };
-
-    // Clean preview URLs
-    useEffect(() => {
-        if (avatar) URL.revokeObjectURL(avatar);
-        if (banner) URL.revokeObjectURL(banner);
-    }, [avatar, banner]);
 
     const nextStep = () => setStep((prev) => prev + 1);
     const prevStep = () => setStep((prev) => prev - 1);
@@ -48,9 +32,11 @@ function CreateChannel() {
         formData.append("name", channelName);
         formData.append("description", description);
         formData.append("category", category);
-        formData.append("avatar", avatar);
-        formData.append("banner", banner);
-
+        if (avatar) formData.append("avatar", avatar);
+        if (banner) formData.append("banner", banner);
+        console.log(avatar);
+        console.log(banner);
+            
         try {
             const res = await axios.post(
                 `${serverUrl}/api/v1/user/createchannel`,
@@ -69,207 +55,221 @@ function CreateChannel() {
         }
     };
 
+    const headings = {
+        1: "Your Appearance",
+        2: "Your Channel",
+        3: "Channel Details",
+    };
+
+    const descriptions = {
+        1: "Set your profile picture and channel name.",
+        2: "Review your channel preview and continue.",
+        3: "Add banner, description, and category to complete your channel.",
+    };
+
+    const inputClasses =
+        "w-full bg-[#1c1c1c] border border-white/10 rounded-2xl px-4 py-3 text-white placeholder:text-gray-400 focus:border-orange-500 focus:outline-none transition";
+
     return (
-        <div className="w-full min-h-screen bg-[#0f0f0f] text-white flex flex-col">
-            {/* Header */}
-            <header className="flex justify-between items-center px-6 py-4 border-b border-gray-800">
-                <div className="flex items-center gap-2">
-                    <img src={logo} alt="Logo" className="w-9 h-9 object-cover" />
-                    <span className="text-white font-bold text-xl tracking-tight">PlayTube</span>
+        <PageShell contentClassName="flex items-center justify-center min-h-screen">
+            <SurfaceCard
+                size="md"
+                heading={headings[step]}
+                subheading={descriptions[step]}
+            >
+                {/* Step Indicator */}
+                <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2 text-gray-400 text-sm">
+                        <img src={logo} alt="Logo" className="w-6" />
+                        <span className="font-semibold text-white/80">Step {step} of 3</span>
+                    </div>
+                    {step > 1 ? (
+                        <button
+                            className="hover:text-white flex items-center gap-2 text-gray-400 text-sm transition"
+                            onClick={prevStep}
+                        >
+                            <FaArrowLeft />
+                            Back
+                        </button>
+                    ) : (
+                        <button
+                            className="hover:text-white text-gray-400 text-sm transition"
+                            onClick={() => navigate("/")}
+                        >
+                            Back to Home
+                        </button>
+                    )}
                 </div>
 
-                <img
-                    src={userData?.profilePictureUrl}
-                    alt="profile"
-                    className="w-10 h-10 rounded-full object-cover"
-                />
-            </header>
-
-            {/* Step Indicator */}
-            <div className="flex justify-center mt-6">
-                <div className="flex gap-4">
+                {/* Step Progress Indicator */}
+                <div className="flex justify-center gap-2 mb-6">
                     {[1, 2, 3].map((num) => (
                         <div
                             key={num}
-                            className={`w-3 h-3 rounded-full ${step === num ? "bg-orange-500" : "bg-gray-600"
-                                }`}
-                        ></div>
+                            className={`h-1.5 rounded-full transition-all duration-300 ${
+                                step >= num ? "bg-gradient-to-r from-orange-500 to-pink-500 w-8" : "bg-gray-700 w-1.5"
+                            }`}
+                        />
                     ))}
                 </div>
-            </div>
 
-            {/* Main Card */}
-            <main className="flex flex-1 justify-center items-start px-4 pt-8">
-                <div className="bg-[#1c1c1c] p-8 rounded-2xl w-full max-w-xl shadow-lg border border-gray-800">
-
-                    {/* -------- STEP 1 -------- */}
-                    {step === 1 && (
-                        <div>
-                            <h2 className="text-3xl font-semibold mb-2">Your Appearance</h2>
-                            <p className="text-sm text-gray-400 mb-8">
-                                Set your profile picture and channel name.
-                            </p>
-
-                            {/* Avatar Upload */}
-                            <div className="flex flex-col items-center mb-8">
-                                <label
-                                    htmlFor="avatar"
-                                    className="cursor-pointer flex flex-col items-center group"
-                                >
+                {/* -------- STEP 1 -------- */}
+                {step === 1 && (
+                    <div className="space-y-6">
+                        {/* Avatar Upload */}
+                        <div className="flex flex-col items-center">
+                            <label
+                                htmlFor="avatar"
+                                className="cursor-pointer flex flex-col items-center group"
+                            >
+                                <div className="w-28 h-28 rounded-full border-2 border-white/15 bg-[#1c1c1c] overflow-hidden flex items-center justify-center group-hover:border-orange-500 transition">
                                     {avatar ? (
                                         <img
                                             src={URL.createObjectURL(avatar)}
-                                            className="w-24 h-24 rounded-xl object-cover border-2 border-gray-700 group-hover:border-orange-500 transition"
+                                            alt="Avatar preview"
+                                            className="w-full h-full object-cover"
                                         />
                                     ) : (
-                                        <div className="w-24 h-24 bg-gray-700 rounded-xl flex items-center justify-center border border-gray-600 group-hover:border-orange-500 transition">
-                                            <FaUserCircle size={50} className="text-gray-400" />
-                                        </div>
+                                        <FaUserCircle className="text-5xl text-gray-500" />
                                     )}
-                                    <span className="text-orange-400 text-sm mt-2">
-                                        Upload Avatar
-                                    </span>
-                                </label>
-
-                                <input
-                                    type="file"
-                                    id="avatar"
-                                    className="hidden"
-                                    accept="image/*"
-                                    onChange={handleAvatar}
-                                />
-                            </div>
+                                </div>
+                                <span className="text-orange-400 text-sm mt-3 font-medium">
+                                    Upload Avatar
+                                </span>
+                            </label>
 
                             <input
+                                type="file"
+                                id="avatar"
+                                className="hidden"
+                                accept="image/*"
+                                onChange={(e) => setAvatar(e.target.files[0])}
+                            />
+                        </div>
+
+                        <div className="space-y-4">
+                            <label className="text-sm text-gray-300 font-medium">
+                                Channel Name
+                            </label>
+                            <input
                                 type="text"
-                                placeholder="Channel Name"
-                                className="w-full p-3 mb-6 rounded-lg bg-[#121212] border border-gray-700 text-white focus:ring-2 focus:ring-orange-500"
+                                placeholder="Enter channel name"
+                                className={inputClasses}
                                 value={channelName}
                                 onChange={(e) => setChannelName(e.target.value)}
                             />
-
-                            <button
-                                disabled={!channelName}
-                                onClick={nextStep}
-                                className={`w-full py-3 rounded-lg font-medium transition ${channelName
-                                        ? "bg-orange-600 hover:bg-orange-700"
-                                        : "bg-gray-700 cursor-not-allowed"
-                                    }`}
-                            >
-                                Continue
-                            </button>
-
-                            <p
-                                onClick={() => navigate("/")}
-                                className="text-sm text-blue-400 mt-3 text-center cursor-pointer hover:underline"
-                            >
-                                Back to Home
-                            </p>
                         </div>
-                    )}
 
-                    {/* -------- STEP 2 -------- */}
-                    {step === 2 && (
-                        <div>
-                            <h2 className="text-3xl font-semibold mb-6">Your Channel</h2>
+                        <button
+                            disabled={!channelName || loading}
+                            onClick={nextStep}
+                            className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:opacity-90 text-white py-3 rounded-2xl font-semibold transition disabled:opacity-60 disabled:cursor-not-allowed"
+                        >
+                            Continue
+                        </button>
+                    </div>
+                )}
 
-                            <div className="flex flex-col items-center mb-8">
+                {/* -------- STEP 2 -------- */}
+                {step === 2 && (
+                    <div className="space-y-6">
+                        <div className="flex flex-col items-center p-6 bg-[#1c1c1c]/50 rounded-2xl border border-white/5">
+                            <div className="w-24 h-24 rounded-full border-2 border-white/15 bg-[#1c1c1c] overflow-hidden flex items-center justify-center mb-4">
                                 {avatar ? (
                                     <img
                                         src={URL.createObjectURL(avatar)}
-                                        className="w-24 h-24 rounded-xl object-cover border-2 border-gray-700"
+                                        alt="Channel avatar"
+                                        className="w-full h-full object-cover"
                                     />
                                 ) : (
-                                    <div className="w-24 h-24 bg-gray-700 rounded-xl flex items-center justify-center border border-gray-600">
-                                        <FaUserCircle size={50} className="text-gray-400" />
-                                    </div>
+                                    <FaUserCircle className="text-4xl text-gray-500" />
                                 )}
-
-                                <h3 className="mt-4 text-lg font-semibold">{channelName}</h3>
                             </div>
-
-                            <button
-                                onClick={nextStep}
-                                className="w-full py-3 rounded-lg bg-orange-600 hover:bg-orange-700 font-medium transition"
-                            >
-                                Continue & Setup Details
-                            </button>
-
-                            <p
-                                onClick={prevStep}
-                                className="text-sm text-blue-400 mt-3 text-center cursor-pointer hover:underline"
-                            >
-                                Back
-                            </p>
+                            <h3 className="text-xl font-semibold">{channelName}</h3>
+                            <p className="text-sm text-gray-400 mt-1">Channel Preview</p>
                         </div>
-                    )}
 
-                    {/* -------- STEP 3 -------- */}
-                    {step === 3 && (
-                        <div>
-                            <h2 className="text-3xl font-semibold mb-6">Channel Details</h2>
+                        <button
+                            onClick={nextStep}
+                            className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:opacity-90 text-white py-3 rounded-2xl font-semibold transition"
+                        >
+                            Continue & Setup Details
+                        </button>
+                    </div>
+                )}
 
-                            {/* Banner Upload */}
+                {/* -------- STEP 3 -------- */}
+                {step === 3 && (
+                    <div className="space-y-6">
+                        {/* Banner Upload */}
+                        <div className="space-y-4">
+                            <label className="text-sm text-gray-300 font-medium">
+                                Banner Image
+                            </label>
                             <label
                                 htmlFor="banner"
-                                className="cursor-pointer block bg-[#121212] border border-gray-700 rounded-xl h-36 flex items-center justify-center text-gray-400 hover:border-orange-500 transition mb-6"
+                                className="cursor-pointer block bg-[#1c1c1c] border border-white/10 rounded-2xl h-36 flex items-center justify-center text-gray-400 hover:border-orange-500 transition overflow-hidden"
                             >
                                 {banner ? (
                                     <img
                                         src={URL.createObjectURL(banner)}
-                                        className="w-full h-full object-cover rounded-xl"
+                                        alt="Banner preview"
+                                        className="w-full h-full object-cover"
                                     />
                                 ) : (
-                                    "Click to upload banner image"
+                                    <span className="text-sm">Click to upload banner image</span>
                                 )}
                             </label>
-
                             <input
                                 type="file"
                                 id="banner"
                                 className="hidden"
                                 accept="image/*"
-                                onChange={handleBanner}
+                                onChange={(e) => setBanner(e.target.files[0])}
                             />
+                        </div>
 
+                        <div className="space-y-4">
+                            <label className="text-sm text-gray-300 font-medium">
+                                Channel Description
+                            </label>
                             <textarea
-                                placeholder="Channel Description"
-                                className="w-full p-3 mb-4 rounded-lg bg-[#121212] border border-gray-700 text-white focus:ring-2 focus:ring-orange-500"
+                                placeholder="Tell viewers about your channel..."
+                                rows={4}
+                                className={`${inputClasses} resize-none`}
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
                             />
+                        </div>
 
+                        <div className="space-y-4">
+                            <label className="text-sm text-gray-300 font-medium">
+                                Channel Category
+                            </label>
                             <input
                                 type="text"
-                                placeholder="Channel Category"
-                                className="w-full p-3 mb-6 rounded-lg bg-[#121212] border border-gray-700 text-white focus:ring-2 focus:ring-orange-500"
+                                placeholder="e.g., Gaming, Music, Education"
+                                className={inputClasses}
                                 value={category}
                                 onChange={(e) => setCategory(e.target.value)}
                             />
-
-                            <button
-                                disabled={!description || !category || loading}
-                                onClick={handleCreateChannel}
-                                className={`w-full py-3 rounded-lg font-medium transition ${description && category
-                                        ? "bg-orange-600 hover:bg-orange-700"
-                                        : "bg-gray-700 cursor-not-allowed"
-                                    }`}
-                            >
-                                {loading ? <ClipLoader size={20} color="white" /> : "Save & Create Channel"}
-                            </button>
-
-                            <p
-                                onClick={prevStep}
-                                className="text-sm text-blue-400 mt-3 text-center cursor-pointer hover:underline"
-                            >
-                                Back
-                            </p>
                         </div>
-                    )}
 
-                </div>
-            </main>
-        </div>
+                        <button
+                            disabled={!description || !category || loading}
+                            onClick={handleCreateChannel}
+                            className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:opacity-90 text-white py-3 rounded-2xl font-semibold transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        >
+                            {loading ? (
+                                <ClipLoader size={20} color="white" />
+                            ) : (
+                                "Save & Create Channel"
+                            )}
+                        </button>
+                    </div>
+                )}
+            </SurfaceCard>
+        </PageShell>
     );
 }
 

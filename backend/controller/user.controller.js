@@ -26,7 +26,7 @@ export const createChannel = async (req, res) => {
             });
         }
 
-        // Single query to check for name or user conflict
+        // Check if channel or owner exists
         const exists = await Channel.findOne({
             $or: [{ name }, { owner: req.userId }]
         });
@@ -45,23 +45,20 @@ export const createChannel = async (req, res) => {
             }
         }
 
+        // ✅ declare them BEFORE using
         let avatar = "";
         let banner = "";
 
         // Upload avatar
         if (req.files?.avatar?.[0]?.path) {
             const uploaded = await uploadOnCloudinary(req.files.avatar[0].path);
-            avatar = uploaded?.url || "";
-            console.log(avatar);
-            
+            avatar = uploaded || "";
         }
 
         // Upload banner
         if (req.files?.banner?.[0]?.path) {
             const uploaded = await uploadOnCloudinary(req.files.banner[0].path);
-            banner = uploaded?.url || "";
-            console.log(banner);
-            
+            banner = uploaded || "";
         }
 
         const channel = await Channel.create({
@@ -73,15 +70,12 @@ export const createChannel = async (req, res) => {
             banner,
         });
 
-        // Update the user with channel details
         const updateData = {
             channel: channel._id,
             username: name,
         };
 
-        if (avatar) {
-            updateData.profilePictureUrl = avatar;
-        }
+        if (avatar) updateData.profilePictureUrl = avatar;
 
         await User.findByIdAndUpdate(req.userId, updateData, { new: true });
 
@@ -89,6 +83,7 @@ export const createChannel = async (req, res) => {
             message: "Channel created successfully.",
             channel
         });
+
     } catch (error) {
         console.error("Error creating channel:", error);
         return res.status(500).json({

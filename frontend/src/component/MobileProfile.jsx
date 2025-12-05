@@ -17,6 +17,7 @@ import { auth, provider } from "../../utils/firebase";
 import { serverUrl } from "../App";
 import { setUserData } from "../redux/userSlice";
 import { useNavigate } from "react-router-dom";
+import PageShell from "./PageShell";
 
 function MobileProfile() {
     const { userData } = useSelector((state) => state.user);
@@ -62,70 +63,89 @@ function MobileProfile() {
     }
 
     return (
-        <div className="md:hidden bg-[#0f0f0f] text-white min-h-screen flex flex-col pt-16 p-2.5">
-            {userData && (
-                <div className="p-4 flex items-center gap-4 border-b border-gray-800">
-                    <img
-                        src={userData?.profilePictureUrl}
-                        alt="Profile"
-                        className="w-16 h-16 rounded-full object-cover"
-                    />
-                    <div className="flex flex-col">
-                        <span className="font-semibold text-lg">@{userData?.username}</span>
-                        <span className="text-gray-400 text-sm">{userData?.email}</span>
-                        <p className="text-sm text-blue-400 cursor-pointer hover:underline" onClick={()=>{userData?.channel ? navigate("/viewchannel") : navigate("/createchannel")}}>{userData?.channel ? "View Channel" : "Create Channel"}</p>
+        <PageShell variant="app" padded={false} className="text-white">
+            <div className="md:hidden min-h-screen flex flex-col pt-16">
+                {userData && (
+                    <div className="p-4 flex items-center gap-4 border-b border-white/10 bg-[#1c1c1c]/50">
+                        <div className="w-16 h-16 rounded-full border-2 border-white/10 overflow-hidden flex items-center justify-center">
+                            <img
+                                src={userData?.profilePictureUrl}
+                                alt="Profile"
+                                className="w-full h-full object-cover"
+                            />
+                        </div>
+                        <div className="flex flex-col flex-1 min-w-0">
+                            <span className="font-semibold text-lg truncate">@{userData?.username}</span>
+                            <span className="text-gray-400 text-sm truncate">{userData?.email}</span>
+                            <button
+                                className="text-sm text-orange-400 hover:text-orange-300 transition mt-1 text-left"
+                                onClick={()=>{userData?.channel ? navigate("/viewchannel") : navigate("/createchannel")}}
+                            >
+                                {userData?.channel ? "View Channel" : "Create Channel"}
+                            </button>
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
 
-            {/* auth buttons */}
-            <div className="flex gap-2 p-4 border-b border-gray-800 overflow-auto">
-                <button 
-                    className="bg-gray-800 text-nowrap px-3 py-1 rounded-2xl text-sm flex items-center justify-center gap-2"
-                    onClick={handleGoogleAuth}
-                >
-                    <FcGoogle className="text-xl"/>SignIn With Google Account
-                </button>
+                {/* auth buttons */}
+                {!userData && (
+                    <div className="flex flex-col gap-2 p-4 border-b border-white/10">
+                        <button 
+                            className="bg-[#1c1c1c] border border-white/10 hover:bg-white/5 text-white px-4 py-3 rounded-2xl text-sm flex items-center justify-center gap-2 transition"
+                            onClick={handleGoogleAuth}
+                        >
+                            <FcGoogle className="text-xl"/>
+                            <span>Sign In With Google</span>
+                        </button>
 
-                <button 
-                    className="bg-gray-800 text-nowrap px-3 py-1 rounded-2xl text-sm flex items-center justify-center gap-2"
-                    onClick={()=>navigate('/signup')}
-                >
-                    <TiUserAddOutline className="text-xl"/>Create New Account
-                </button>
+                        <button 
+                            className="bg-[#1c1c1c] border border-white/10 hover:bg-white/5 text-white px-4 py-3 rounded-2xl text-sm flex items-center justify-center gap-2 transition"
+                            onClick={()=>navigate('/signup')}
+                        >
+                            <TiUserAddOutline className="text-xl"/>
+                            <span>Create New Account</span>
+                        </button>
 
-                <button 
-                    className="bg-gray-800 text-nowrap px-3 py-1 rounded-2xl text-sm flex items-center justify-center gap-2"
-                    onClick={()=>navigate('/signin')}
-                >
-                    <MdOutlineSwitchAccount className="text-xl"/>SignIn With Other account
-                </button>
+                        <button 
+                            className="bg-[#1c1c1c] border border-white/10 hover:bg-white/5 text-white px-4 py-3 rounded-2xl text-sm flex items-center justify-center gap-2 transition"
+                            onClick={()=>navigate('/signin')}
+                        >
+                            <MdOutlineSwitchAccount className="text-xl"/>
+                            <span>Sign In With Other Account</span>
+                        </button>
+                    </div>
+                )}
 
-                <button 
-                    className="bg-gray-800 text-nowrap px-3 py-1 rounded-2xl text-sm flex items-center justify-center gap-2"
-                    onClick={handleSignOut}
-                >
-                    <FiLogOut className="text-xl"/>Sign Out
-                </button>
+                {userData && (
+                    <>
+                        <div className="flex flex-col mt-4 gap-1 px-2">
+                            <ProfileMenuItem icon={<FaHistory />} label="History" />
+                            <ProfileMenuItem icon={<FaList />} label="Playlist" />
+                            <ProfileMenuItem icon={<GoVideo />} label="Saved Videos" />
+                            <ProfileMenuItem icon={<FaThumbsUp />} label="Liked Videos" />
+                            {userData?.channel && (
+                                <ProfileMenuItem icon={<SiYoutubestudio className="text-orange-400" />} label="PT Studio" />
+                            )}
+                        </div>
+                        <div className="h-px w-full bg-white/10 my-2" />
+                        <button 
+                            className="bg-[#1c1c1c] border border-red-500/20 hover:bg-red-500/10 text-red-400 px-4 py-3 rounded-2xl text-sm flex items-center justify-center gap-2 transition mx-2"
+                            onClick={handleSignOut}
+                        >
+                            <FiLogOut className="text-xl"/>
+                            <span>Sign Out</span>
+                        </button>
+                    </>
+                )}
             </div>
-
-            <div
-                className="flex flex-col mt-10 gap-2"
-            >
-                <ProfileMenuItem icon={<FaHistory />} label="History" />
-                <ProfileMenuItem icon={<FaList />} label="Playlist" />
-                <ProfileMenuItem icon={<GoVideo />} label="Saved Videos" />
-                <ProfileMenuItem icon={<FaThumbsUp />} label="Liked Videos" />
-                <ProfileMenuItem icon={<SiYoutubestudio className="text-orange-400" />} label="PT Studio" />
-            </div>
-        </div>
+        </PageShell>
     )
 }
 
 function ProfileMenuItem({ icon, label, onClick }) {
     return (
         <button
-            className="flex items-center gap-3 p-4 active:bg-[#272727] text-left w-full rounded-2xl"
+            className="flex items-center gap-3 p-4 hover:bg-white/5 active:bg-white/10 text-left w-full rounded-2xl transition"
             onClick={onClick}
         >
             <span className="text-lg">{icon}</span>

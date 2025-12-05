@@ -42,7 +42,7 @@ function Home() {
         <div className="relative min-h-screen">
 
             {/* Header */}
-            <header className="bg-[#0f0f0f] h-16 px-4 border-b border-gray-800 fixed top-0 left-0 right-0 z-50">
+            <header className="bg-[#0f0f0f]/95 backdrop-blur-xl h-16 px-4 border-b border-white/10 fixed top-0 left-0 right-0 z-50">
                 <div className="flex items-center justify-between h-full">
 
                     {/* Left */}
@@ -95,7 +95,7 @@ function Home() {
             </header >
             {/* Sidebar */}
             < aside
-                className={`bg-[#0f0f0f] border-r border-gray-800 fixed top-16 bottom-0 left-0 z-40
+                className={`bg-[#0f0f0f]/95 backdrop-blur-xl border-r border-white/10 fixed top-16 bottom-0 left-0 z-40
                 hidden md:flex flex-col overflow-y-auto transition-all duration-300
                 ${sidebarOpen ? "w-60" : "w-20"}`
                 }
@@ -128,7 +128,7 @@ function Home() {
                     />
                 </nav>
 
-                <div className="my-4 border-t border-gray-800"></div>
+                <div className="my-4 border-t border-white/10"></div>
 
                 {/* You section */}
                 <nav className="space-y-1">
@@ -155,10 +155,10 @@ function Home() {
                                 <button
                                     key={category}
                                     onClick={() => setActiveCategory(category)}
-                                    className={`px-4 py-1 rounded-lg text-sm whitespace-nowrap transition-all duration-200 
+                                    className={`px-4 py-2 rounded-full text-sm whitespace-nowrap transition-all duration-200 font-medium
                                 ${activeCategory === category
-                                            ? "bg-white text-black"
-                                            : "bg-[#272727] hover:bg-gray-700"}`}
+                                            ? "bg-white text-black shadow-lg"
+                                            : "bg-[#272727] hover:bg-[#3a3a3a] text-gray-300"}`}
                                 >
                                     {category}
                                 </button>
@@ -173,7 +173,7 @@ function Home() {
             </main >
 
             {/* Mobile Bottom Nav */}
-            < nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#0f0f0f] border-t border-gray-800 flex justify-around py-2 z-10" >
+            < nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#0f0f0f]/95 backdrop-blur-xl border-t border-white/10 flex justify-around py-2 z-10" >
 
                 <MobileSizeNav
                     icon={<FaHome />}
@@ -233,9 +233,9 @@ function SidebarItem({ icon, text, open, selected, setSelected, onClick }) {
     return (
         <button
             onClick={handleClick}
-            className={`flex items-center gap-4 p-2 rounded w-full transition-colors
+            className={`flex items-center gap-4 p-3 rounded-xl w-full transition-all duration-200
             ${open ? "justify-start" : "justify-center"} 
-            ${isActive ? "bg-gray-700 text-white" : "text-gray-400 hover:bg-gray-800 hover:text-white"}`}
+            ${isActive ? "bg-white/10 text-white font-medium" : "text-gray-400 hover:bg-white/5 hover:text-white"}`}
         >
             <span className="text-lg">{icon}</span>
             {open && <span className="text-sm">{text}</span>}
@@ -248,12 +248,12 @@ function MobileSizeNav({ icon, text, onClick, active }) {
     return (
         <button
             onClick={onClick}
-            className={`flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg 
-            transition-all duration-300 
-            ${active ? "text-white" : "text-gray-400"} hover:scale-105`}
+            className={`flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl 
+            transition-all duration-200 
+            ${active ? "text-white bg-white/10" : "text-gray-400"} hover:bg-white/5 active:scale-95`}
         >
-            <span className="text-2xl">{icon}</span>
-            <span className="text-xs">{text}</span>
+            <span className="text-xl">{icon}</span>
+            <span className="text-xs font-medium">{text}</span>
         </button>
     );
 }

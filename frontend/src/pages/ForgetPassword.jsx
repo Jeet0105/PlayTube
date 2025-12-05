@@ -37,7 +37,7 @@ function ForgetPassword() {
     };
 
     const inputClasses =
-        "mt-2 w-full px-4 py-3 border border-white/10 bg-[#1c1c1c] rounded-2xl text-white placeholder:text-gray-400 focus:outline-none focus:border-orange-500 transition";
+        "w-full bg-[#1c1c1c] border border-white/10 rounded-2xl px-4 py-3 text-white placeholder:text-gray-400 focus:border-orange-500 focus:outline-none transition";
 
     // SEND OTP
     const handleSendOtp = async () => {
@@ -147,7 +147,7 @@ function ForgetPassword() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             disabled={loading}
-                            placeholder='you@playtube.com'
+                            placeholder="you@playtube.com"
                         />
 
                         <button
@@ -181,7 +181,7 @@ function ForgetPassword() {
                             value={OTP}
                             onChange={(e) => setOTP(e.target.value)}
                             disabled={loading}
-                            placeholder='1234'
+                            placeholder="1234"
                         />
 
                         <button
@@ -212,12 +212,12 @@ function ForgetPassword() {
                         </label>
 
                         <input
-                            type={show ? 'text' : 'password'}
+                            type={show ? "text" : "password"}
                             className={inputClasses}
                             value={resetPassword}
                             onChange={(e) => setResetPassword(e.target.value)}
                             disabled={loading}
-                            placeholder='••••••••'
+                            placeholder="••••••••"
                         />
 
                         <label className='flex items-center gap-2 text-sm text-gray-400'>
