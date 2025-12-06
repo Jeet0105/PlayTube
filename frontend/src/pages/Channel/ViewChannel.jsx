@@ -34,6 +34,7 @@ function ViewChannel() {
                     setError("Channel not found");
                 }
             } catch (error) {
+                console.log(error);
                 setError("Failed to load channel data");
             } finally {
                 setLoading(false);
@@ -152,8 +153,8 @@ function ViewChannel() {
                 {/* Action Buttons */}
                 <div className='flex flex-wrap gap-3 mt-6 justify-center'>
                     <button 
-                        onClick={() => navigate('/createchannel')}
-                        className='bg-white hover:bg-gray-100 text-black px-5 py-2 rounded-full font-medium transition flex items-center gap-2'
+                        onClick={() => navigate('/updatechannel')}
+                        className='bg-white hover:bg-gray-100 text-black px-5 py-2 rounded-full font-medium transition flex items-center gap-2 cursor-pointer'
                     >
                         <FaEdit className='text-sm' />
                         Customize Channel

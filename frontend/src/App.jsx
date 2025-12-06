@@ -16,6 +16,8 @@ const MobileProfile = lazy(() => import("./component/MobileProfile"));
 const ForgetPassword = lazy(() => import("./pages/ForgetPassword"));
 const CreateChannel = lazy(() => import("./pages/Channel/CreateChannel"));
 const ViewChannel = lazy(() => import("./pages/Channel/ViewChannel"));
+const UpdateChannel = lazy(() => import("./pages/Channel/UpdateChannel"));
+
 
 function App() {
   GetCurrentUser();
@@ -40,6 +42,8 @@ function App() {
           <Route path="/signin" element={<SignIn />} />
           <Route path="/forgetpass" element={<ForgetPassword />} />
           <Route path="/createchannel" element={<CreateChannel />} />
+          <Route path="/updatechannel" element={<UpdateChannel />} />
+          <Route path="/updatechannel" element={<UpdateChannel />} />
         </Routes>
       </Suspense>
 

@@ -24,6 +24,7 @@ export const API_ENDPOINTS = {
     GET_USER: "/api/v1/user/get-user",
     CREATE_CHANNEL: "/api/v1/user/createchannel",
     GET_CHANNEL: "/api/v1/user/get-channel",
+    UPDATE_CHANNEL: "/api/v1/user/updatechannel",
   },
 };
 
