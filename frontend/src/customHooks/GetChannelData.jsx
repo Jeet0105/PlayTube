@@ -18,6 +18,7 @@ const GetChannelData = () => {
                 }
             } catch (error) {
                 // Error is handled by axios interceptor
+                console.log(error);               
                 dispatch(setChannelData(null));
             }
         };
