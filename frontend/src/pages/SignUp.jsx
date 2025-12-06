@@ -2,10 +2,10 @@ import { useState } from "react";
 import { FaArrowLeft, FaUserCircle, FaEye, FaEyeSlash } from "react-icons/fa";
 import logo from "../../public/logo.png";
 import { useNavigate } from "react-router-dom";
-import { serverUrl } from "../App";
-import axios from "axios";
+import api from "../utils/axios";
+import { API_ENDPOINTS } from "../utils/constants";
 import { toast } from "react-toastify";
-import { ClipLoader } from "react-spinners";
+import LoadingSpinner from "../components/LoadingSpinner";
 import { useDispatch } from "react-redux";
 import { setUserData } from "../redux/userSlice";
 import PageShell from "../component/PageShell";
@@ -77,18 +77,19 @@ function SignUp() {
         formData.append("profilePicture", backendImage);
 
         try {
-            const res = await axios.post(`${serverUrl}/api/v1/auth/signup`, formData);
+            const res = await api.post(API_ENDPOINTS.AUTH.SIGNUP, formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
 
-            if (res.status === 201) {
-                toast.success("Account created successfully!");
+            if (res.data.success && res.data.user) {
+                toast.success(res.data.message || "Account created successfully!");
                 dispatch(setUserData(res.data.user));
                 navigate("/signin");
-            } else {
-                toast.error(res.data.message || "Signup failed");
             }
         } catch (error) {
-            console.error("Signup error:", error);
-            toast.error(error.response?.data?.message || "Signup failed");
+            // Error is handled by axios interceptor
         } finally {
             setLoading(false);
         }
@@ -249,7 +250,7 @@ function SignUp() {
                             disabled={loading}
                         >
                             {loading ? (
-                                <ClipLoader size={22} color="white" />
+                                <LoadingSpinner size={22} color="#fff" />
                             ) : (
                                 "Create Account"
                             )}

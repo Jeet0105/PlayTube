@@ -3,9 +3,9 @@ import { FaUserCircle, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import logo from "../../public/logo.png";
 import { toast } from "react-toastify";
-import axios from "axios";
-import { serverUrl } from "../App";
-import { ClipLoader } from "react-spinners";
+import api from "../utils/axios";
+import { API_ENDPOINTS } from "../utils/constants";
+import LoadingSpinner from "../components/LoadingSpinner";
 import { useDispatch } from "react-redux";
 import { setUserData } from "../redux/userSlice";
 import PageShell from "../component/PageShell";
@@ -20,24 +20,28 @@ function SignIn() {
 
   const navigate = useNavigate();
 
-  const handleSignIn = async () => {
+  const handleSignIn = async (e) => {
+    e?.preventDefault();
+    
     if (!email || !password) {
       toast.error("Please fill all the fields");
       return;
     }
 
     setLoading(true);
-    // const formData = new FormData();
-    // formData.append("email", email);
-    // formData.append("password", password);
     try {
-      const res = await axios.post(`${serverUrl}/api/v1/auth/signin`, { email, password }, { withCredentials: true });
-      toast.success(res?.data?.message);
-      dispatch(setUserData(res.data.user));
-      console.log(res.data);
-      navigate("/");
+      const res = await api.post(API_ENDPOINTS.AUTH.SIGNIN, { 
+        email: email.trim(), 
+        password 
+      });
+      
+      if (res.data.success && res.data.user) {
+        toast.success(res.data.message);
+        dispatch(setUserData(res.data.user));
+        navigate("/");
+      }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Sign in failed");
+      // Error is handled by axios interceptor
     } finally {
       setLoading(false);
     }
@@ -99,7 +103,7 @@ function SignIn() {
           disabled={loading}
           className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:opacity-90 text-white py-3 rounded-2xl font-semibold transition disabled:opacity-60 flex items-center justify-center gap-2"
         >
-          {loading ? <ClipLoader size={20} color="white" /> : "Sign In"}
+          {loading ? <LoadingSpinner size={20} color="#fff" /> : "Sign In"}
         </button>
 
         <div className="flex flex-wrap justify-between gap-4 text-gray-400 text-sm">

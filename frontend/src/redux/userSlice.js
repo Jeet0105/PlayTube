@@ -3,17 +3,18 @@ import { createSlice } from '@reduxjs/toolkit';
 const userSlice = createSlice({
     name: 'user',
     initialState: {
-        userData: null
+        userData: null,
+        channelData: null
     },
     reducers: {
         setUserData: (state, action) => {
             state.userData = action.payload;
         },
-        clearUserData: (state) => {
-            state.userData = null;
+        setChannelData: (state, action) => {
+            state.channelData = action.payload;
         }
     }
 });
 
-export const { setUserData, clearUserData } = userSlice.actions;
+export const { setUserData, setChannelData } = userSlice.actions;
 export default userSlice.reducer;

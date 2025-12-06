@@ -3,9 +3,9 @@ import logo from "../../../public/logo.png";
 import { FaUserCircle, FaArrowLeft } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import axios from "axios";
-import { serverUrl } from "../../App";
-import { ClipLoader } from "react-spinners";
+import api from "../../utils/axios";
+import { API_ENDPOINTS } from "../../utils/constants";
+import LoadingSpinner from "../../components/LoadingSpinner";
 import PageShell from "../../component/PageShell";
 import SurfaceCard from "../../component/SurfaceCard";
 
@@ -38,18 +38,18 @@ function CreateChannel() {
         console.log(banner);
             
         try {
-            const res = await axios.post(
-                `${serverUrl}/api/v1/user/createchannel`,
-                formData,
-                { withCredentials: true }
-            );
+            const res = await api.post(API_ENDPOINTS.USER.CREATE_CHANNEL, formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
 
-            toast.success(res?.data?.message || "Channel created successfully");
-            navigate("/");
-
+            if (res.data.success) {
+                toast.success(res.data.message || "Channel created successfully");
+                navigate("/");
+            }
         } catch (error) {
-            console.log(error);
-            toast.error(error.response?.data?.message || "Channel not created! Try again");
+            // Error is handled by axios interceptor
         } finally {
             setLoading(false);
         }
@@ -261,7 +261,7 @@ function CreateChannel() {
                             className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:opacity-90 text-white py-3 rounded-2xl font-semibold transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                         >
                             {loading ? (
-                                <ClipLoader size={20} color="white" />
+                                <LoadingSpinner size={20} color="#fff" />
                             ) : (
                                 "Save & Create Channel"
                             )}

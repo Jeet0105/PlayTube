@@ -4,9 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import PageShell from '../component/PageShell';
 import SurfaceCard from '../component/SurfaceCard';
 import { toast } from 'react-toastify';
-import axios from 'axios';
-import { serverUrl } from '../App';
-import { ClipLoader } from 'react-spinners';
+import api from '../utils/axios';
+import { API_ENDPOINTS } from '../utils/constants';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 function ForgetPassword() {
     const navigate = useNavigate();
@@ -49,18 +49,16 @@ function ForgetPassword() {
         setLoading(true);
 
         try {
-            const res = await axios.post(
-                `${serverUrl}/api/v1/auth/sendotp`,
-                { email: email.trim().toLowerCase() },
-                { withCredentials: true }
-            );
+            const res = await api.post(API_ENDPOINTS.AUTH.SEND_OTP, {
+                email: email.trim().toLowerCase()
+            });
 
-            toast.success(res.data?.message || "OTP sent successfully");
-            setStep(2);
-
+            if (res.data.success) {
+                toast.success(res.data.message || "OTP sent successfully");
+                setStep(2);
+            }
         } catch (error) {
-            toast.error(error.response?.data?.message || "Something went wrong. Try again!");
-            console.error("Send OTP Error:", error);
+            // Error is handled by axios interceptor
         } finally {
             setLoading(false);
         }
@@ -76,18 +74,17 @@ function ForgetPassword() {
         setLoading(true);
 
         try {
-            const res = await axios.post(
-                `${serverUrl}/api/v1/auth/verifyotp`,
-                { email: email.trim().toLowerCase(), otp: OTP },
-                { withCredentials: true }
-            );
+            const res = await api.post(API_ENDPOINTS.AUTH.VERIFY_OTP, {
+                email: email.trim().toLowerCase(),
+                otp: OTP
+            });
 
-            toast.success(res.data?.message || "OTP verified successfully");
-            setStep(3);
-
+            if (res.data.success) {
+                toast.success(res.data.message || "OTP verified successfully");
+                setStep(3);
+            }
         } catch (error) {
-            toast.error(error.response?.data?.message || "Invalid OTP. Try again!");
-            console.error("Verify OTP Error:", error);
+            // Error is handled by axios interceptor
         } finally {
             setLoading(false);
         }
@@ -103,18 +100,17 @@ function ForgetPassword() {
         setLoading(true);
 
         try {
-            const res = await axios.post(
-                `${serverUrl}/api/v1/auth/resetpassword`,
-                { email: email.trim().toLowerCase(), newPassword: resetPassword },
-                { withCredentials: true }
-            );
+            const res = await api.post(API_ENDPOINTS.AUTH.RESET_PASSWORD, {
+                email: email.trim().toLowerCase(),
+                newPassword: resetPassword
+            });
 
-            toast.success(res.data?.message || "Password reset successfully");
-            navigate("/signin");
-
+            if (res.data.success) {
+                toast.success(res.data.message || "Password reset successfully");
+                navigate("/signin");
+            }
         } catch (error) {
-            toast.error(error.response?.data?.message || "Failed to reset password.");
-            console.error("Reset Password Error:", error);
+            // Error is handled by axios interceptor
         } finally {
             setLoading(false);
         }
@@ -156,7 +152,7 @@ function ForgetPassword() {
                             onClick={handleSendOtp}
                             disabled={loading}
                         >
-                            {loading ? <ClipLoader color='black' size={20} /> : steps[step].actionLabel}
+                            {loading ? <LoadingSpinner size={20} color="#000" /> : steps[step].actionLabel}
                         </button>
 
                         <button
@@ -190,7 +186,7 @@ function ForgetPassword() {
                             onClick={handleVerifyOtp}
                             disabled={loading}
                         >
-                            {loading ? <ClipLoader /> : steps[step].actionLabel}
+                            {loading ? <LoadingSpinner /> : steps[step].actionLabel}
                         </button>
 
                         <div className='flex justify-between text-sm text-gray-400'>
@@ -236,7 +232,7 @@ function ForgetPassword() {
                             onClick={handleResetPassword}
                             disabled={loading}
                         >
-                            {loading ? <ClipLoader /> : steps[step].actionLabel}
+                            {loading ? <LoadingSpinner /> : steps[step].actionLabel}
                         </button>
 
                         <button
