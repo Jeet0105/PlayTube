@@ -1,5 +1,5 @@
 import express from "express";
-import { createChannel, getChannelData, getCurrentUser } from "../controller/user.controller.js";
+import { createChannel, getChannelData, getCurrentUser, updateChannel } from "../controller/user.controller.js";
 import { verifyUser } from "../middleware/verifyUser.js";
 import { imageUpload } from "../middleware/multer.js";
 
@@ -11,5 +11,9 @@ router.post("/createchannel", verifyUser, imageUpload.fields([
     { name: "banner", maxCount: 1 }
 ]), createChannel);
 router.get("/get-channel", verifyUser, getChannelData);
+router.put("/updatechannel", verifyUser, imageUpload.fields([
+    { name: "avatar", maxCount: 1 },
+    { name: "banner", maxCount: 1 }
+]), updateChannel);
 
 export default router;
