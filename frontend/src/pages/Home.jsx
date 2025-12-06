@@ -14,11 +14,12 @@ import { MdOutlineSubscriptions } from "react-icons/md";
 import { IoIosAddCircle } from "react-icons/io";
 
 import logo from "../../public/logo.png";
-import { useState } from "react";
+import { useState, useMemo, useCallback, memo } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Profile from "../component/Profile";
 import PageShell from "../component/PageShell";
+import { CATEGORIES } from "../utils/constants";
 
 function Home() {
     const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -30,12 +31,23 @@ function Home() {
     const location = useLocation();
     const { userData } = useSelector((state) => state.user);
 
-    const categories = [
-        "All", "Music", "Gaming", "News", "Movies", "Sports", "Learning",
-        "Fashion & Beauty", "TV Shows", "Trending", "Live", "Comedy",
-        "Entertainment", "Education", "Science & Technology", "Art",
-        "Cooking", "Travel", "Autos & Vehicles"
-    ];
+    // Memoize categories to prevent re-creation on every render
+    const categories = useMemo(() => CATEGORIES, []);
+
+    // Memoize handlers to prevent unnecessary re-renders
+    const toggleSidebar = useCallback(() => {
+        setSidebarOpen(prev => !prev);
+    }, []);
+
+    const toggleProfile = useCallback(() => {
+        setProfileOpen(prev => !prev);
+    }, []);
+
+    const handleCategoryClick = useCallback((category) => {
+        setActiveCategory(category);
+    }, []);
+
+    const isHomePage = useMemo(() => location.pathname === "/", [location.pathname]);
 
     return (
         <PageShell variant="app" padded={false} className="text-white">
@@ -48,8 +60,9 @@ function Home() {
                     {/* Left */}
                     <div className="flex items-center gap-4">
                         <button
-                            onClick={() => setSidebarOpen(prev => !prev)}
+                            onClick={toggleSidebar}
                             className="text-xl bg-[#272727] p-2 rounded-full hidden md:flex hover:bg-[#3a3a3a] transition cursor-pointer"
+                            aria-label="Toggle sidebar"
                         >
                             <FaBars />
                         </button>
@@ -80,7 +93,7 @@ function Home() {
                     </div>
 
                     {/* Right */}
-                    <div className="flex items-center gap-4" onClick={() => setProfileOpen(prev => !prev)}>
+                    <div className="flex items-center gap-4" onClick={toggleProfile}>
                         {userData?.channel &&
                             < button className="hidden md:flex items-center gap-2 bg-[#272727] px-4 py-2 rounded-full hover:bg-[#3a3a3a] transition cursor-pointer">
                                 <span className="text-lg font-bold">+</span>
@@ -148,24 +161,23 @@ function Home() {
                 ${sidebarOpen ? "md:ml-60" : "md:ml-20"}`}>
 
                 {/* Categories — only on Home */}
-                {
-                    location.pathname === "/" && (
-                        <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide pt-2 mt-16">
-                            {categories.map((category) => (
-                                <button
-                                    key={category}
-                                    onClick={() => setActiveCategory(category)}
-                                    className={`px-4 py-2 rounded-full text-sm whitespace-nowrap transition-all duration-200 font-medium
+                {isHomePage && (
+                    <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide pt-2 mt-16">
+                        {categories.map((category) => (
+                            <button
+                                key={category}
+                                onClick={() => handleCategoryClick(category)}
+                                className={`px-4 py-2 rounded-full text-sm whitespace-nowrap transition-all duration-200 font-medium
                                 ${activeCategory === category
-                                            ? "bg-white text-black shadow-lg"
-                                            : "bg-[#272727] hover:bg-[#3a3a3a] text-gray-300"}`}
-                                >
-                                    {category}
-                                </button>
-                            ))}
-                        </div>
-                    )
-                }
+                                        ? "bg-white text-black shadow-lg"
+                                        : "bg-[#272727] hover:bg-[#3a3a3a] text-gray-300"}`}
+                                aria-label={`Filter by ${category}`}
+                            >
+                                {category}
+                            </button>
+                        ))}
+                    </div>
+                )}
                 {profileOpen && <Profile />}
                 <div className="mt-2">
                     <Outlet />
@@ -222,7 +234,7 @@ function Home() {
 }
 
 /* Sidebar Component */
-function SidebarItem({ icon, text, open, selected, setSelected, onClick }) {
+const SidebarItem = memo(({ icon, text, open, selected, setSelected, onClick }) => {
     const isActive = selected === text;
 
     const handleClick = () => {
@@ -236,26 +248,32 @@ function SidebarItem({ icon, text, open, selected, setSelected, onClick }) {
             className={`flex items-center gap-4 p-3 rounded-xl w-full transition-all duration-200
             ${open ? "justify-start" : "justify-center"} 
             ${isActive ? "bg-white/10 text-white font-medium" : "text-gray-400 hover:bg-white/5 hover:text-white"}`}
+            aria-label={text}
         >
             <span className="text-lg">{icon}</span>
             {open && <span className="text-sm">{text}</span>}
         </button>
     );
-}
+});
+
+SidebarItem.displayName = "SidebarItem";
 
 /* Mobile Nav Component */
-function MobileSizeNav({ icon, text, onClick, active }) {
+const MobileSizeNav = memo(({ icon, text, onClick, active }) => {
     return (
         <button
             onClick={onClick}
             className={`flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-xl 
             transition-all duration-200 
             ${active ? "text-white bg-white/10" : "text-gray-400"} hover:bg-white/5 active:scale-95`}
+            aria-label={text}
         >
             <span className="text-xl">{icon}</span>
             <span className="text-xs font-medium">{text}</span>
         </button>
     );
-}
+});
+
+MobileSizeNav.displayName = "MobileSizeNav";
 
 export default Home;

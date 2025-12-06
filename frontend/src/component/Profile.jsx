@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { FiLogOut } from 'react-icons/fi'
 import { FcGoogle } from 'react-icons/fc'
@@ -7,8 +7,8 @@ import { TiUserAddOutline } from 'react-icons/ti'
 import { SiYoutubestudio } from 'react-icons/si'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import axios from 'axios'
-import { serverUrl } from '../App'
+import api from '../utils/axios'
+import { API_ENDPOINTS } from '../utils/constants'
 import { setUserData } from '../redux/userSlice'
 import { auth, provider } from '../../utils/firebase.js'
 import { signInWithPopup } from 'firebase/auth'
@@ -17,19 +17,23 @@ function Profile() {
     const { userData } = useSelector((state) => state.user);
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const [isSigningOut, setIsSigningOut] = useState(false);
 
     const handleSignOut = async () => {
+        // Prevent multiple simultaneous calls
+        if (isSigningOut) return;
+        
+        setIsSigningOut(true);
         try {
-            const res = await axios.get(`${serverUrl}/api/v1/auth/signout`, { withCredentials: true });
-            if (res.status === 200) {
-                toast.success("Signed out successfully.");
+            const res = await api.get(API_ENDPOINTS.AUTH.SIGNOUT);
+            if (res.data.success) {
+                toast.success(res.data.message || "Signed out successfully.");
                 dispatch(setUserData(null));
-            } else {
-                toast.error("Failed to sign out. Please try again.");
             }
         } catch (error) {
-            toast.error("Failed to sign out. Please try again.");
-            console.error("Error signing out:", error);
+            // Error is handled by axios interceptor
+        } finally {
+            setIsSigningOut(false);
         }
     };
 
@@ -43,15 +47,13 @@ function Profile() {
                 email: email,
                 profilePictureUrl: photoURL,
             };
-            const response = await axios.post(`${serverUrl}/api/v1/auth/googleauth`, userData, { withCredentials: true });
-            if (response.status === 200) {
-                toast.success("Signed in with Google successfully.");
+            const response = await api.post(API_ENDPOINTS.AUTH.GOOGLE_AUTH, userData);
+            if (response.data.success && response.data.user) {
+                toast.success(response.data.message || "Signed in with Google successfully.");
                 dispatch(setUserData(response.data.user));
-            } else {
-                toast.error("Google sign-in failed. Please try again.");
             }
         } catch (error) {
-            toast.error("Google sign-in failed. Please try again.");
+            // Error is handled by axios interceptor
             console.error("Error during Google sign-in:", error);
         }
     }
@@ -116,11 +118,12 @@ function Profile() {
                             )}
                             <div className="h-px w-full bg-white/10 my-1" />
                             <button 
-                                className='flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition cursor-pointer text-left text-red-400 hover:text-red-300' 
+                                className='flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition cursor-pointer text-left text-red-400 hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed' 
                                 onClick={handleSignOut}
+                                disabled={isSigningOut}
                             >
                                 <FiLogOut className='text-xl' />
-                                <span>Sign Out</span>
+                                <span>{isSigningOut ? "Signing out..." : "Sign Out"}</span>
                             </button>
                         </>
                     )}
