@@ -177,6 +177,7 @@ function ViewChannel() {
                 </p>
                 <button 
                     className='bg-white hover:bg-gray-100 text-black px-6 py-2.5 rounded-full font-semibold transition flex items-center gap-2'
+                    onClick={()=> navigate("/create")}
                 >
                     <span className='text-xl'>+</span>
                     Create

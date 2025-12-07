@@ -97,7 +97,7 @@ function Home() {
                         {userData?.channel && (
                             <button 
                                 className="hidden md:flex items-center gap-2 bg-[#272727] px-4 py-2 rounded-full hover:bg-[#3a3a3a] transition cursor-pointer"
-                                onClick={() => navigate("/createchannel")}
+                                onClick={() => navigate("/create")}
                             >
                                 <span className="text-lg font-bold">+</span>
                                 <span className="font-medium">Create</span>
@@ -260,7 +260,7 @@ function Home() {
                     icon={<IoIosAddCircle />}
                     text="Add"
                     active={selectedItem === "Add"}
-                    onClick={() => setSelectedItem("Add")}
+                    onClick={() => {setSelectedItem("Add"); navigate("/create")} }
                 />
 
                 <MobileSizeNav
