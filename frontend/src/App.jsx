@@ -4,6 +4,8 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ErrorBoundary from "./components/ErrorBoundary";
 import LoadingSpinner from "./components/LoadingSpinner";
+import ProtectRoute from "./components/ProtectRoute";
+import PublicRoute from "./components/PublicRoute";
 import GetCurrentUser from "./customHooks/GetCurrentUser";
 import GetChannelData from "./customHooks/GetChannelData";
 
@@ -18,11 +20,10 @@ const CreateChannel = lazy(() => import("./pages/Channel/CreateChannel"));
 const ViewChannel = lazy(() => import("./pages/Channel/ViewChannel"));
 const UpdateChannel = lazy(() => import("./pages/Channel/UpdateChannel"));
 
-
 function App() {
   GetCurrentUser();
   GetChannelData();
-  
+
   return (
     <ErrorBoundary>
       <Suspense
@@ -34,16 +35,19 @@ function App() {
       >
         <Routes>
           <Route path="/" element={<Home />}>
-            <Route path="mobilepro" element={<MobileProfile />} />
-            <Route path="shorts" element={<Shorts />} />
-            <Route path="viewchannel" element={<ViewChannel />} />
+            <Route path="mobilepro" element={<ProtectRoute><MobileProfile /></ProtectRoute>} />
+            <Route path="shorts" element={<ProtectRoute><Shorts /></ProtectRoute>} />
+            <Route path="viewchannel" element={<ProtectRoute requireChannel><ViewChannel /></ProtectRoute>} />
           </Route>
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/signin" element={<SignIn />} />
+          
+          {/* Protected Routes */}
+          <Route path="/updatechannel" element={<ProtectRoute requireChannel><UpdateChannel /></ProtectRoute>} />
+          <Route path="/createchannel" element={<ProtectRoute><CreateChannel /></ProtectRoute>} />
+          
+          {/* Public Routes (redirect if already logged in) */}
+          <Route path="/signup" element={<PublicRoute><SignUp /></PublicRoute>} />
+          <Route path="/signin" element={<PublicRoute><SignIn /></PublicRoute>} />
           <Route path="/forgetpass" element={<ForgetPassword />} />
-          <Route path="/createchannel" element={<CreateChannel />} />
-          <Route path="/updatechannel" element={<UpdateChannel />} />
-          <Route path="/updatechannel" element={<UpdateChannel />} />
         </Routes>
       </Suspense>
 

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FaArrowLeft, FaUserCircle, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FcGoogle } from "react-icons/fc";
 import logo from "../../public/logo.png";
 import { useNavigate } from "react-router-dom";
 import api from "../utils/axios";
@@ -8,6 +9,8 @@ import { toast } from "react-toastify";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { useDispatch } from "react-redux";
 import { setUserData } from "../redux/userSlice";
+import { signInWithPopup } from "firebase/auth";
+import { auth, provider } from "../../utils/firebase";
 import PageShell from "../component/PageShell";
 import SurfaceCard from "../component/SurfaceCard";
 
@@ -26,6 +29,7 @@ function SignUp() {
     const [frontendImage, setFrontendImage] = useState(null);
 
     const [loading, setLoading] = useState(false);
+    const [googleLoading, setGoogleLoading] = useState(false);
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -103,6 +107,34 @@ function SignUp() {
         setStep((prev) => prev - 1);
     };
 
+    const handleGoogleSignUp = async () => {
+        if (googleLoading) return;
+        
+        setGoogleLoading(true);
+        try {
+            const res = await signInWithPopup(auth, provider);
+            const { displayName, email, photoURL } = res.user;
+
+            const userData = {
+                username: displayName,
+                email: email,
+                profilePictureUrl: photoURL,
+            };
+            
+            const response = await api.post(API_ENDPOINTS.AUTH.GOOGLE_AUTH, userData);
+            if (response.data.success && response.data.user) {
+                toast.success(response.data.message || "Account created with Google successfully.");
+                dispatch(setUserData(response.data.user));
+                navigate("/");
+            }
+        } catch (error) {
+            // Error is handled by axios interceptor
+            console.error("Error during Google sign-up:", error);
+        } finally {
+            setGoogleLoading(false);
+        }
+    };
+
     const headings = {
         1: "Create your PlayTube identity",
         2: "Secure your account",
@@ -138,6 +170,29 @@ function SignUp() {
 
                 {step === 1 && (
                     <div className="space-y-5">
+                        {/* Google Sign Up Button */}
+                        <button
+                            onClick={handleGoogleSignUp}
+                            disabled={googleLoading || loading}
+                            className="w-full bg-[#1c1c1c] border border-white/10 hover:bg-white/5 text-white py-3 rounded-2xl font-medium transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+                        >
+                            {googleLoading ? (
+                                <LoadingSpinner size={20} color="#fff" />
+                            ) : (
+                                <>
+                                    <FcGoogle className="text-2xl" />
+                                    <span>Continue with Google</span>
+                                </>
+                            )}
+                        </button>
+
+                        {/* Divider */}
+                        <div className="flex items-center gap-4">
+                            <div className="flex-1 h-px bg-white/10"></div>
+                            <span className="text-sm text-gray-400">or</span>
+                            <div className="flex-1 h-px bg-white/10"></div>
+                        </div>
+
                         <input
                             type="text"
                             value={username}

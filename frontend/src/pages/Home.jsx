@@ -93,15 +93,26 @@ function Home() {
                     </div>
 
                     {/* Right */}
-                    <div className="flex items-center gap-4" onClick={toggleProfile}>
-                        {userData?.channel &&
-                            < button className="hidden md:flex items-center gap-2 bg-[#272727] px-4 py-2 rounded-full hover:bg-[#3a3a3a] transition cursor-pointer">
+                    <div className="flex items-center gap-4">
+                        {userData?.channel && (
+                            <button 
+                                className="hidden md:flex items-center gap-2 bg-[#272727] px-4 py-2 rounded-full hover:bg-[#3a3a3a] transition cursor-pointer"
+                                onClick={() => navigate("/createchannel")}
+                            >
                                 <span className="text-lg font-bold">+</span>
                                 <span className="font-medium">Create</span>
                             </button>
-                        }
+                        )}
 
-                        {!userData?.profilePictureUrl ? <FaUserCircle className="text-3xl hidden md:flex text-gray-300 hover:text-white transition cursor-pointer" /> : <img src={userData?.profilePictureUrl} alt="User" className="w-8 h-8 rounded-full hidden md:flex cursor-pointer" />}
+                        <div onClick={userData ? toggleProfile : () => navigate("/")}>
+                            {!userData ? (
+                                <FaUserCircle className="text-3xl hidden md:flex text-gray-300 hover:text-white transition cursor-pointer" />
+                            ) : !userData?.profilePictureUrl ? (
+                                <FaUserCircle className="text-3xl hidden md:flex text-gray-300 hover:text-white transition cursor-pointer" />
+                            ) : (
+                                <img src={userData?.profilePictureUrl} alt="User" className="w-8 h-8 rounded-full hidden md:flex cursor-pointer" />
+                            )}
+                        </div>
                         <FaSearch className="text-xl md:hidden flex cursor-pointer" />
                     </div>
                 </div>
@@ -129,7 +140,13 @@ function Home() {
                         open={sidebarOpen}
                         selected={selectedItem}
                         setSelected={setSelectedItem}
-                        onClick={() => navigate("/shorts")}
+                        onClick={() => {
+                            if (userData) {
+                                navigate("/shorts");
+                            } else {
+                                navigate("/");
+                            }
+                        }}
                     />
 
                     <SidebarItem
@@ -149,10 +166,38 @@ function Home() {
                         <p className="text-sm text-gray-400 px-3 mb-2">You</p>
                     )}
 
-                    <SidebarItem icon={<FaHistory />} text="History" open={sidebarOpen} selected={selectedItem} setSelected={setSelectedItem} />
-                    <SidebarItem icon={<FaList />} text="Playlist" open={sidebarOpen} selected={selectedItem} setSelected={setSelectedItem} />
-                    <SidebarItem icon={<GoVideo />} text="Saved Videos" open={sidebarOpen} selected={selectedItem} setSelected={setSelectedItem} />
-                    <SidebarItem icon={<FaThumbsUp />} text="Liked Videos" open={sidebarOpen} selected={selectedItem} setSelected={setSelectedItem} />
+                    <SidebarItem 
+                        icon={<FaHistory />} 
+                        text="History" 
+                        open={sidebarOpen} 
+                        selected={selectedItem} 
+                        setSelected={setSelectedItem}
+                        onClick={() => !userData && navigate("/")}
+                    />
+                    <SidebarItem 
+                        icon={<FaList />} 
+                        text="Playlist" 
+                        open={sidebarOpen} 
+                        selected={selectedItem} 
+                        setSelected={setSelectedItem}
+                        onClick={() => !userData && navigate("/")}
+                    />
+                    <SidebarItem 
+                        icon={<GoVideo />} 
+                        text="Saved Videos" 
+                        open={sidebarOpen} 
+                        selected={selectedItem} 
+                        setSelected={setSelectedItem}
+                        onClick={() => !userData && navigate("/")}
+                    />
+                    <SidebarItem 
+                        icon={<FaThumbsUp />} 
+                        text="Liked Videos" 
+                        open={sidebarOpen} 
+                        selected={selectedItem} 
+                        setSelected={setSelectedItem}
+                        onClick={() => !userData && navigate("/")}
+                    />
                 </nav>
             </aside >
 
@@ -203,7 +248,11 @@ function Home() {
                     active={selectedItem === "Shorts"}
                     onClick={() => {
                         setSelectedItem("Shorts");
-                        navigate("/shorts");
+                        if (userData) {
+                            navigate("/shorts");
+                        } else {
+                            navigate("/");
+                        }
                     }}
                 />
 
@@ -222,10 +271,17 @@ function Home() {
                 />
 
                 <MobileSizeNav
-                    icon={!userData?.profilePictureUrl?<FaUserCircle />: <img src={userData.profilePictureUrl} alt="User" className="w-6 h-6 rounded-full" />}
+                    icon={!userData ? <FaUserCircle /> : !userData?.profilePictureUrl ? <FaUserCircle /> : <img src={userData.profilePictureUrl} alt="User" className="w-6 h-6 rounded-full" />}
                     text="You"
                     active={selectedItem === "You"}
-                    onClick={() => {setSelectedItem("You"); navigate("/mobilepro")}}
+                    onClick={() => {
+                        setSelectedItem("You");
+                        if (userData) {
+                            navigate("/mobilepro");
+                        } else {
+                            navigate("/");
+                        }
+                    }}
                 />
             </nav >
         </div >

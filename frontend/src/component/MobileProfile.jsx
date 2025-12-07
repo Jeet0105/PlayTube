@@ -36,6 +36,7 @@ function MobileProfile() {
             if (res.data.success) {
                 toast.success(res.data.message || "Signed out successfully.");
                 dispatch(setUserData(null));
+                navigate("/signin");
             }
         } catch (error) {
             // Error is handled by axios interceptor
