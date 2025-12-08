@@ -1,7 +1,7 @@
 import express from "express";
 import rateLimit from "express-rate-limit";
 import { googleAuth, resetPassword, sendOtp, signIn, signOut, signUp, verifyOtp } from "../controller/auth.controller.js";
-import { imageUpload } from "../middleware/multer.js";
+import { uploadBoth } from "../middleware/multer.js";
 
 const router = express.Router();
 
@@ -30,9 +30,9 @@ const signoutLimiter = rateLimit({
 });
 
 // Apply strict limiter to sensitive endpoints
-router.post("/signup", strictAuthLimiter, imageUpload.single("profilePicture"), signUp);
+router.post("/signup", strictAuthLimiter, uploadBoth.single("profilePicture"), signUp);
 router.post("/signin", strictAuthLimiter, signIn);
-router.post("/googleauth", strictAuthLimiter, imageUpload.single("profilePicture"), googleAuth);
+router.post("/googleauth", strictAuthLimiter, uploadBoth.single("profilePicture"), googleAuth);
 router.post("/sendotp", strictAuthLimiter, sendOtp);
 router.post("/verifyotp", strictAuthLimiter, verifyOtp);
 router.post("/resetpassword", strictAuthLimiter, resetPassword);

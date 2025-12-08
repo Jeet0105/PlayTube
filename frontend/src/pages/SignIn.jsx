@@ -45,7 +45,7 @@ function SignIn() {
         navigate("/");
       }
     } catch (error) {
-      // Error is handled by axios interceptor
+      console.log(error);
     } finally {
       setLoading(false);
     }

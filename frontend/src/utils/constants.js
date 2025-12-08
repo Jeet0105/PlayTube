@@ -26,6 +26,9 @@ export const API_ENDPOINTS = {
     GET_CHANNEL: "/api/v1/user/get-channel",
     UPDATE_CHANNEL: "/api/v1/user/updatechannel",
   },
+  CONTENT: {
+    Create_Video:"/api/v1/content/create-video",
+  }
 };
 
 // Categories
