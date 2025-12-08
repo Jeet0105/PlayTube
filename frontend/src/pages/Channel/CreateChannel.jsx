@@ -47,9 +47,12 @@ function CreateChannel() {
             if (res.data.success) {
                 toast.success(res.data.message || "Channel created successfully");
                 navigate("/");
+            } else {
+                toast.error(res.data.message || "Try again!!")
             }
         } catch (error) {
-            // Error is handled by axios interceptor
+            toast.error("Try again!!")
+            console.log(error);
         } finally {
             setLoading(false);
         }

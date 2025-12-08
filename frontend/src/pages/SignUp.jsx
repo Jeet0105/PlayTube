@@ -91,9 +91,12 @@ function SignUp() {
                 toast.success(res.data.message || "Account created successfully!");
                 dispatch(setUserData(res.data.user));
                 navigate("/signin");
+            } else {
+                toast.error(res.data.message || "Try again!!")
             }
         } catch (error) {
-            // Error is handled by axios interceptor
+            toast.error("Try again!!");
+            console.log(error);
         } finally {
             setLoading(false);
         }

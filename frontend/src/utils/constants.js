@@ -28,6 +28,7 @@ export const API_ENDPOINTS = {
   },
   CONTENT: {
     Create_Video:"/api/v1/content/create-video",
+    Create_Short:"/api/v1/content/create-short",
   }
 };
 
