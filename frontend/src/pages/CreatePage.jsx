@@ -47,16 +47,16 @@ function CreatePage() {
         // TODO: Navigate to appropriate creation page based on selected option
         switch (selected) {
             case "Video":
-                // navigate("/upload-video");
+                navigate("/create-video");
                 break;
             case "Short":
-                // navigate("/create-short");
+                navigate("/create-short");
                 break;
             case "Post":
-                // navigate("/create-post");
+                navigate("/create-post");
                 break;
             case "PlayList":
-                // navigate("/create-playlist");
+                navigate("/create-playlist");
                 break;
             default:
                 break;

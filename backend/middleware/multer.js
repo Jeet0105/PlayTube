@@ -34,19 +34,16 @@ const storage = multer.diskStorage({
   },
 });
 
-// Image upload (for profile pictures, avatars, banners)
-export const imageUpload = multer({
+export const uploadBoth = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
-  fileFilter: imageFilter,
+  limits: { fileSize: 1024 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (allowedVideoTypes.includes(file.mimetype)) return cb(null, true);
+    if (allowedImageTypes.includes(file.mimetype)) return cb(null, true);
+    cb(new Error("Invalid file type"));
+  }
 });
 
-// Video upload (for future video uploads)
-export const videoUpload = multer({
-  storage,
-  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB
-  fileFilter: videoFilter,
-});
 
 // Default upload (backward compatibility)
 const upload = multer({

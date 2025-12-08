@@ -20,6 +20,10 @@ const CreateChannel = lazy(() => import("./pages/Channel/CreateChannel"));
 const ViewChannel = lazy(() => import("./pages/Channel/ViewChannel"));
 const UpdateChannel = lazy(() => import("./pages/Channel/UpdateChannel"));
 const CreatePage = lazy(() => import("./pages/CreatePage"));
+const CreateVideo = lazy(() => import("./pages/Video/CreateVideo"))
+const CreateShort = lazy(() => import("./pages/Shorts/CreateShort"))
+const CreatePlayList = lazy(() => import("./pages/Playlist/CreatePlayList"))
+const CreatePost = lazy(() => import("./pages/Post/CreatePost"))
 
 function App() {
   GetCurrentUser();
@@ -40,12 +44,16 @@ function App() {
             <Route path="shorts" element={<ProtectRoute><Shorts /></ProtectRoute>} />
             <Route path="viewchannel" element={<ProtectRoute requireChannel><ViewChannel /></ProtectRoute>} />
             <Route path="create" element={<ProtectRoute requireChannel><CreatePage /></ProtectRoute>} />
+            <Route path="create-video" element={<ProtectRoute requireChannel><CreateVideo /></ProtectRoute>} />
+            <Route path="create-short" element={<ProtectRoute requireChannel><CreateShort /></ProtectRoute>} />
+            <Route path="create-playlist" element={<ProtectRoute requireChannel><CreatePlayList /></ProtectRoute>} />
+            <Route path="create-post" element={<ProtectRoute requireChannel><CreatePost /></ProtectRoute>} />
           </Route>
-          
+
           {/* Protected Routes */}
           <Route path="/updatechannel" element={<ProtectRoute requireChannel><UpdateChannel /></ProtectRoute>} />
           <Route path="/createchannel" element={<ProtectRoute><CreateChannel /></ProtectRoute>} />
-          
+
           {/* Public Routes (redirect if already logged in) */}
           <Route path="/signup" element={<PublicRoute><SignUp /></PublicRoute>} />
           <Route path="/signin" element={<PublicRoute><SignIn /></PublicRoute>} />
