@@ -43,6 +43,8 @@ function SignIn() {
         toast.success(res.data.message);
         dispatch(setUserData(res.data.user));
         navigate("/");
+      } else {
+        toast.error(res.data.message || "Signed in not successfully.Try again!!")
       }
     } catch (error) {
       console.log(error);
@@ -70,6 +72,8 @@ function SignIn() {
         toast.success(response.data.message || "Signed in with Google successfully.");
         dispatch(setUserData(response.data.user));
         navigate("/");
+      } else {
+        toast.error(response.data.message || "Signed in with Google not successfully.Try again!!")
       }
     } catch (error) {
       // Error is handled by axios interceptor
