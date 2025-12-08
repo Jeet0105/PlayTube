@@ -6,6 +6,7 @@ import rateLimit from "express-rate-limit";
 import connectDB from "./config/db.js";
 import authRoutes from "./route/auth.route.js";
 import userRoutes from "./route/user.route.js";
+import contentRoutes from "./route/content.route.js";
 import { errorHandler, asyncHandler } from "./middleware/errorHandler.js";
 import { validateEnv } from "./middleware/validateEnv.js";
 import { securityMiddleware, additionalSecurityHeaders } from "./middleware/security.js";
@@ -85,6 +86,7 @@ app.get("/", (req, res) => {
 // Auth routes have their own rate limiting applied in the route file
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/content", contentRoutes);
 
 // 404 handler
 app.use((req, res) => {
