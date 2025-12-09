@@ -1,8 +1,8 @@
 import express from "express";
 import { verifyUser } from "../middleware/verifyUser.js";
-import { createVideo } from "../controller/video.controller.js";
+import { createVideo, getAllVideos } from "../controller/video.controller.js";
 import { uploadBoth } from '../middleware/multer.js';
-import { createShort } from "../controller/short.controller.js";
+import { createShort, getAllShorts } from "../controller/short.controller.js";
 
 const router = express.Router();
 
@@ -16,6 +16,7 @@ router.post(
     ]),
     createVideo
 );
+router.get("/getallvideos",verifyUser,getAllVideos);
 
 // Short Routes
 router.post(
@@ -24,5 +25,6 @@ router.post(
     uploadBoth.single("shortUrl"),
     createShort
 );
+router.get("/getallshorts",verifyUser,getAllShorts);
 
 export default router;

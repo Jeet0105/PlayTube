@@ -50,3 +50,20 @@ export const createVideo = asyncHandler(async (req, res) => {
 
     return res.status(201).json(newVideo);
 });
+
+export const getAllVideos = asyncHandler(async (req, res) => {
+    const videos = await Video.find().sort({ createdAt: -1 });
+
+    if (videos.length === 0) {
+        return res.status(404).json({
+            success: false,
+            message: "No videos available right now"
+        });
+    }
+
+    return res.status(200).json({
+        success: true,
+        message: "Videos retrieved successfully",
+        videos
+    });
+});

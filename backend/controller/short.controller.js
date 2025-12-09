@@ -44,3 +44,20 @@ export const createShort = asyncHandler(async (req, res) => {
 
     return res.status(201).json(newShort);
 });
+
+export const getAllShorts = asyncHandler(async (req, res) => {
+    const shorts = await Short.find().sort({ createdAt: -1 });
+
+    if (shorts.length === 0) {
+        return res.status(404).json({
+            success: false,
+            message: "No shorts available right now"
+        });
+    }
+
+    return res.status(200).json({
+        success: true,
+        message: "Shorts retrieved successfully",
+        shorts
+    });
+});
