@@ -52,7 +52,7 @@ export const createVideo = asyncHandler(async (req, res) => {
 });
 
 export const getAllVideos = asyncHandler(async (req, res) => {
-    const videos = await Video.find().sort({ createdAt: -1 });
+    const videos = await Video.find().sort({ createdAt: -1 }).populate("channel");
 
     if (videos.length === 0) {
         return res.status(404).json({
