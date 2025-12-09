@@ -8,6 +8,7 @@ import ProtectRoute from "./components/ProtectRoute";
 import PublicRoute from "./components/PublicRoute";
 import GetCurrentUser from "./customHooks/GetCurrentUser";
 import GetChannelData from "./customHooks/GetChannelData";
+import GetAllContentData from "./customHooks/GetAllContentData";
 
 // Lazy load components for code splitting
 const Home = lazy(() => import("./pages/Home"));
@@ -28,6 +29,7 @@ const CreatePost = lazy(() => import("./pages/Post/CreatePost"))
 function App() {
   GetCurrentUser();
   GetChannelData();
+  GetAllContentData();
 
   return (
     <ErrorBoundary>

@@ -3,8 +3,10 @@ import api from "../../utils/axios";
 import { API_ENDPOINTS } from "../../utils/constants";
 import { toast } from "react-toastify";
 import LoadingSpinner from "../../components/LoadingSpinner";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { setAllShortData } from "../../redux/contentSlice";
+import { setChannelData } from "../../redux/userSlice";
 
 function CreateShort() {
     const [shortFile, setShortFile] = useState(null);
@@ -13,6 +15,8 @@ function CreateShort() {
     const [tags, setTags] = useState("");
     const [loading, setLoading] = useState(false);
 
+    const dispatch = useDispatch();
+    const { allShortData } = useSelector(state => state.content)
     const { channelData } = useSelector((state) => state.user);
     const navigate = useNavigate();
 
@@ -56,10 +60,16 @@ function CreateShort() {
             if (shortRef.current) shortRef.current.value = "";
 
             if (res.status === 201) {
-              navigate("/");
-              toast.success("Short uploaded successfully");
+                dispatch(setAllShortData([...allShortData, res.data]))
+                const updatedChannel = {
+                    ...channelData,
+                    shorts: [...(channelData.shorts || []), res.data]
+                }
+                dispatch(setChannelData(updatedChannel));
+                navigate("/");
+                toast.success("Short uploaded successfully");
             } else {
-              toast.error(res.data.message || "Try again!!")
+                toast.error(res.data.message || "Try again!!")
             }
         } catch (err) {
             console.error("Upload error:", err);

@@ -3,8 +3,10 @@ import api from "../../utils/axios";
 import { API_ENDPOINTS } from "../../utils/constants";
 import { toast } from "react-toastify";
 import LoadingSpinner from "../../components/LoadingSpinner";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { setAllVideosData } from "../../redux/contentSlice";
+import { setChannelData } from "../../redux/userSlice";
 
 function CreateVideo() {
     const [videoUrl, setVideoUrl] = useState(null);
@@ -14,7 +16,9 @@ function CreateVideo() {
     const [tags, setTags] = useState("");
     const [loading, setLoading] = useState(false);
 
-    const { channelData } = useSelector(state=>state.user);
+    const dispath = useDispatch();
+    const { allVideosData } = useSelector(state => state.content);
+    const { channelData } = useSelector(state => state.user);
     const navigate = useNavigate();
 
     // file input refs (fixes re-upload issue)
@@ -59,8 +63,6 @@ function CreateVideo() {
                 { headers: { "Content-Type": "multipart/form-data" } }
             );
 
-            toast.success("Video uploaded successfully ✨");
-
             setVideoUrl(null);
             setThumbnail(null);
             setTitle("");
@@ -70,8 +72,16 @@ function CreateVideo() {
             if (videoRef.current) videoRef.current.value = "";
             if (thumbRef.current) thumbRef.current.value = "";
             console.log(res.data);
-            if(res.status==201) {
-                navigate("/")
+            if (res.status == 201) {
+                toast.success("Video uploaded successfully");
+                navigate("/");
+                dispath(setAllVideosData([...allVideosData, res.data]));
+                const updatedChannel = {
+                    ...channelData,videos: [...(channelData.videos || []),res.data]
+                }
+                dispath(setChannelData(updatedChannel));
+            } else {
+                toast.error("Try Again!!")
             }
         } catch (err) {
             console.error("Upload error:", err);
