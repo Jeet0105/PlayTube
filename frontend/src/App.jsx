@@ -25,6 +25,7 @@ const CreateVideo = lazy(() => import("./pages/Video/CreateVideo"))
 const CreateShort = lazy(() => import("./pages/Shorts/CreateShort"))
 const CreatePlayList = lazy(() => import("./pages/Playlist/CreatePlayList"))
 const CreatePost = lazy(() => import("./pages/Post/CreatePost"))
+const PlayVideo = lazy(() => import("./pages/Video/PlayVideo"))
 
 function App() {
   GetCurrentUser();
@@ -55,6 +56,7 @@ function App() {
           {/* Protected Routes */}
           <Route path="/updatechannel" element={<ProtectRoute requireChannel><UpdateChannel /></ProtectRoute>} />
           <Route path="/createchannel" element={<ProtectRoute><CreateChannel /></ProtectRoute>} />
+          <Route path="/playvideo/:videoId" element={<ProtectRoute><PlayVideo /></ProtectRoute>} />
 
           {/* Public Routes (redirect if already logged in) */}
           <Route path="/signup" element={<PublicRoute><SignUp /></PublicRoute>} />

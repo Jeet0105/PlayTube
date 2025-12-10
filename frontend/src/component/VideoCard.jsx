@@ -1,6 +1,8 @@
-function VideoCard({ thumbnail, duration, channelLogo, title, channelName, views }) {
+import { Link } from "react-router-dom";
+
+function VideoCard({ thumbnail, duration, channelLogo, title, channelName, views, id }) {
     return (
-        <div className="w-[360px] cursor-pointer">
+        <Link to={`/playvideo/${id}`} className="w-[360px] cursor-pointer">
             <div className="relative">
                 <img
                     src={thumbnail}
@@ -26,7 +28,7 @@ function VideoCard({ thumbnail, duration, channelLogo, title, channelName, views
                     <p className="text-xs text-gray-400">{views}</p>
                 </div>
             </div>
-        </div>
+        </Link>
     );
 }
 

@@ -35,7 +35,7 @@ function AllVideosPage() {
     }, [allVideosData]);
 
     return (
-        <div className="flex flex-wrap gap-6 mb-12 sm:items-center sm:justify-center">
+        <div className="flex flex-wrap gap-6 mb-12 sm:items-center sm:justify-center md:justify-start">
             {allVideosData?.map((video) => (
                 <VideoCard
                     key={video?._id}
@@ -44,6 +44,7 @@ function AllVideosPage() {
                     channelLogo={video?.channel?.avatar}
                     channelName={video?.channel?.name}
                     duration={duration[video._id] || "0:00"}
+                    id={video?._id}
                 />
             ))}
         </div>

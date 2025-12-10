@@ -22,6 +22,8 @@ import PageShell from "../component/PageShell";
 import { CATEGORIES } from "../utils/constants";
 
 const AllVideosPage = lazy(() => import("../component/AllVideosPage"));
+const AllShortsPage = lazy(() => import("../component/AllShortsPage"));
+
 
 function Home() {
     const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -227,6 +229,7 @@ function Home() {
                             </div>
                             <div className="mt-3">
                                 <AllVideosPage />
+                                <AllShortsPage />
                             </div>
                         </>
                     )}
