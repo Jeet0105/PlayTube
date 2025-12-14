@@ -67,3 +67,69 @@ export const getAllVideos = asyncHandler(async (req, res) => {
         videos
     });
 });
+
+export const toggleLike = asyncHandler(async (req, res) => {
+  const { videoId } = req.body;
+  const userId = req.userId;
+
+  if (!videoId) {
+    return res.status(400).json({ message: "VideoId is required." });
+  }
+
+  const video = await Video.findById(videoId);
+  if (!video) {
+    return res.status(404).json({ message: "Video not found." });
+  }
+
+  const hasLiked = video.likes.includes(userId);
+
+  if (hasLiked) {
+    // Remove like
+    video.likes = video.likes.filter(id => id.toString() !== userId);
+  } else {
+    // Add like and remove dislike if exists
+    video.likes.push(userId);
+    video.dislikes = video.dislikes.filter(id => id.toString() !== userId);
+  }
+
+  await video.save();
+
+  return res.status(200).json({
+    success: true,
+    message: hasLiked ? "Like removed" : "Video liked",
+    video,
+  });
+});
+
+export const toggleDislike = asyncHandler(async (req, res) => {
+  const { videoId } = req.body;
+  const userId = req.userId;
+
+  if (!videoId) {
+    return res.status(400).json({ message: "VideoId is required." });
+  }
+
+  const video = await Video.findById(videoId);
+  if (!video) {
+    return res.status(404).json({ message: "Video not found." });
+  }
+
+  const hasDisliked = video.dislikes.includes(userId);
+
+  if (hasDisliked) {
+    // Remove dislike
+    video.dislikes = video.dislikes.filter(id => id.toString() !== userId);
+  } else {
+    // Add dislike and remove like if exists
+    video.dislikes.push(userId);
+    video.likes = video.likes.filter(id => id.toString() !== userId);
+  }
+
+  await video.save();
+
+  return res.status(200).json({
+    success: true,
+    message: hasDisliked ? "Dislike removed" : "Video disliked",
+    video,
+  });
+});
