@@ -25,6 +25,7 @@ export const API_ENDPOINTS = {
     CREATE_CHANNEL: "/api/v1/user/createchannel",
     GET_CHANNEL: "/api/v1/user/get-channel",
     UPDATE_CHANNEL: "/api/v1/user/updatechannel",
+    SUBSCRIBE: "/api/v1/user/togglesubscribe",
   },
   CONTENT: {
     Create_Video:"/api/v1/content/create-video",

@@ -1,5 +1,5 @@
 import express from "express";
-import { createChannel, getChannelData, getCurrentUser, updateChannel } from "../controller/user.controller.js";
+import { createChannel, getChannelData, getCurrentUser, toggleSubscribe, updateChannel } from "../controller/user.controller.js";
 import { verifyUser } from "../middleware/verifyUser.js";
 import { uploadBoth } from "../middleware/multer.js";
 
@@ -15,5 +15,6 @@ router.put("/updatechannel", verifyUser, uploadBoth.fields([
     { name: "avatar", maxCount: 1 },
     { name: "banner", maxCount: 1 }
 ]), updateChannel);
+router.post("/togglesubscribe",verifyUser,toggleSubscribe);
 
 export default router;

@@ -13,9 +13,9 @@ export const getCurrentUser = asyncHandler(async (req, res) => {
         });
 
     if (!user) {
-        return res.status(404).json({ 
+        return res.status(404).json({
             success: false,
-            message: "User not found" 
+            message: "User not found"
         });
     }
 
@@ -106,9 +106,9 @@ export const getChannelData = asyncHandler(async (req, res) => {
     const userId = req.userId;
 
     if (!userId) {
-        return res.status(400).json({ 
+        return res.status(400).json({
             success: false,
-            message: "User ID missing" 
+            message: "User ID missing"
         });
     }
 
@@ -117,9 +117,9 @@ export const getChannelData = asyncHandler(async (req, res) => {
         .select("+subscriberCount");
 
     if (!channel) {
-        return res.status(404).json({ 
+        return res.status(404).json({
             success: false,
-            message: "Channel not found" 
+            message: "Channel not found"
         });
     }
 
@@ -161,7 +161,7 @@ export const updateChannel = asyncHandler(async (req, res) => {
     // Check if name is being changed and if it conflicts with another channel
     const trimmedName = name.trim();
     if (channel.name !== trimmedName) {
-        const nameExists = await Channel.findOne({ 
+        const nameExists = await Channel.findOne({
             name: trimmedName,
             _id: { $ne: channel._id } // Exclude current channel
         });
@@ -232,6 +232,41 @@ export const updateChannel = asyncHandler(async (req, res) => {
     return res.status(200).json({
         success: true,
         message: "Channel updated successfully.",
+        channel
+    });
+});
+
+export const toggleSubscribe = asyncHandler(async (req, res) => {
+    const { channelId } = req.body;
+    const userId = req.userId;
+
+    if (!channelId) {
+        return res.status(400).json({ message: "ChannelId is required." });
+    }
+
+    const channel = await Channel.findById(channelId)
+        .populate("owner", "-password -resetOtp -otpExpires -isOtpVerified");
+
+    if (!channel) {
+        return res.status(404).json({ message: "Channel not found." });
+    }
+
+    if (channel.owner._id.equals(userId)) {
+        return res.status(400).json({ message: "Cannot subscribe to your own channel" });
+    }
+
+    const isSubscribed = channel.subscribers.includes(userId);
+
+    isSubscribed
+        ? channel.subscribers.pull(userId)
+        : channel.subscribers.addToSet(userId);
+
+    await channel.save();
+
+    return res.status(200).json({
+        success: true,
+        subscribed: !isSubscribed,
+        message: isSubscribed ? "Unsubscribed" : "Subscribed",
         channel
     });
 });
