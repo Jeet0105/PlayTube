@@ -28,10 +28,16 @@ export const API_ENDPOINTS = {
     SUBSCRIBE: "/api/v1/user/togglesubscribe",
   },
   CONTENT: {
-    Create_Video:"/api/v1/content/create-video",
-    Create_Short:"/api/v1/content/create-short",
-    Get_All_Videos:"/api/v1/content/getallvideos",
-    Get_All_Shorts:"/api/v1/content/getallshorts",
+    Create_Video: "/api/v1/content/create-video",
+    Create_Short: "/api/v1/content/create-short",
+    Get_All_Videos: "/api/v1/content/getallvideos",
+    Get_All_Shorts: "/api/v1/content/getallshorts",
+    LIKE_VIDEO: (videoId) => `/api/v1/content/videos/${videoId}/like`,
+    DISLIKE_VIDEO: (videoId) => `/api/v1/content/videos/${videoId}/dislike`,
+    SAVE_VIDEO: (videoId) => `/api/v1/content/videos/${videoId}/save`,
+    INCREMENT_VIEW: (videoId) => `/api/v1/content/videos/${videoId}/views`,
+    ADD_COMMENT: (videoId) => `/api/v1/content/videos/${videoId}/comments`,
+    ADD_REPLY: (videoId, commentId) => `/api/v1/content/videos/${videoId}/comments/${commentId}/replies`,
   }
 };
 

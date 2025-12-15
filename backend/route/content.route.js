@@ -1,6 +1,6 @@
 import express from "express";
 import { verifyUser } from "../middleware/verifyUser.js";
-import { createVideo, getAllVideos } from "../controller/video.controller.js";
+import { addComment, addReply, createVideo, getAllVideos, incrementView, toggleDislike, toggleLike, toggleSave } from "../controller/video.controller.js";
 import { uploadBoth } from '../middleware/multer.js';
 import { createShort, getAllShorts } from "../controller/short.controller.js";
 
@@ -16,7 +16,13 @@ router.post(
     ]),
     createVideo
 );
-router.get("/getallvideos",verifyUser,getAllVideos);
+router.get("/getallvideos", verifyUser, getAllVideos);
+router.patch("/videos/:videoId/like", verifyUser, toggleLike);
+router.patch("/videos/:videoId/dislike", verifyUser, toggleDislike);
+router.patch("/videos/:videoId/save", verifyUser, toggleSave);
+router.patch("/videos/:videoId/views", incrementView);
+router.post("/videos/:videoId/comments", verifyUser, addComment);
+router.post("/videos/:videoId/comments/:commentId/replies", verifyUser, addReply);
 
 // Short Routes
 router.post(
@@ -25,6 +31,6 @@ router.post(
     uploadBoth.single("shortUrl"),
     createShort
 );
-router.get("/getallshorts",verifyUser,getAllShorts);
+router.get("/getallshorts", verifyUser, getAllShorts);
 
 export default router;

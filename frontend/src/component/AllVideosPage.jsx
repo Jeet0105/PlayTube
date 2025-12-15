@@ -45,6 +45,7 @@ function AllVideosPage() {
                     channelName={video?.channel?.name}
                     duration={duration[video._id] || "0:00"}
                     id={video?._id}
+                    views={video?.views}
                 />
             ))}
         </div>
