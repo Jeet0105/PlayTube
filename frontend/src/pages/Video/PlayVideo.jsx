@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import {
     FaPlay,
     FaPause,
@@ -20,7 +20,7 @@ import Description from "../../component/Description";
 import { toast } from "react-toastify";
 import api from "../../utils/axios";
 import { API_ENDPOINTS } from "../../utils/constants";
-import { setChannelData } from "../../redux/userSlice";
+import LoadingSpinner from "../../components/LoadingSpinner";
 
 function PlayVideo() {
     const videoRef = useRef(null);
@@ -41,6 +41,9 @@ function PlayVideo() {
 
     const [loading, setLoading] = useState(false);
 
+    const [comment, setComment] = useState([]);
+    const [newcomment, setNewComment] = useState("");
+
     const { videoId } = useParams();
     const { allVideosData, allShortData } = useSelector((state) => state.content);
     const { userData } = useSelector((state) => state.user);
@@ -58,7 +61,7 @@ function PlayVideo() {
     const suggestedVideos = allVideosData?.filter((v) => v._id !== videoId).slice(0, 10) || [];
     const suggestedShorts = allShortData?.slice(0, 10) || [];
 
-    const dispatch = useDispatch()
+    const hasViewed = useRef(false);
 
     useEffect(() => {
         if (!allVideosData) return;
@@ -66,7 +69,22 @@ function PlayVideo() {
         if (currVideo) {
             setVideo(currVideo);
             setChannel(currVideo.channel);
+            setComment(currVideo?.comments);
         }
+
+        const incView = async () => {
+            if (hasViewed.current) return;
+            try {
+                const res = await api.patch(
+                    API_ENDPOINTS.CONTENT.INCREMENT_VIEW(videoId)
+                );
+                hasViewed.current = true;
+                setVideo((prev) => prev ? { ...prev, views: res.data.video.views } : prev)
+            } catch (error) {
+                console.error("Failed to increment view:", error);
+            }
+        }
+        incView()
     }, [videoId, allVideosData]);
 
     useEffect(() => {
@@ -195,6 +213,114 @@ function PlayVideo() {
             )
         );
     }, [channel?.subscribers, userData?._id]);
+
+    const toggleLike = async () => {
+        if (!videoId) return;
+
+        try {
+            const res = await api.patch(API_ENDPOINTS.CONTENT.LIKE_VIDEO(videoId));
+
+            setVideo((prev) =>
+                prev
+                    ? {
+                        ...prev,
+                        likes: res.data.video.likes,
+                        dislikes: res.data.video.dislikes
+                    }
+                    : prev
+            );
+        } catch (error) {
+            console.error("Failed to toggle like:", error);
+        }
+    };
+
+    const toggleDislike = async () => {
+        if (!videoId) return;
+
+        try {
+            const res = await api.patch(API_ENDPOINTS.CONTENT.DISLIKE_VIDEO(videoId));
+
+            setVideo((prev) =>
+                prev
+                    ? {
+                        ...prev,
+                        likes: res.data.video.likes,
+                        dislikes: res.data.video.dislikes
+                    }
+                    : prev
+            );
+        } catch (error) {
+            console.error("Failed to toggle dislike:", error);
+        }
+    };
+
+    const toggleSave = async () => {
+        if (!videoId) return;
+
+        try {
+            const res = await api.patch(API_ENDPOINTS.CONTENT.SAVE_VIDEO(videoId));
+
+            setVideo((prev) =>
+                prev
+                    ? {
+                        ...prev,
+                        saveBy: res.data.video.saveBy,
+                    }
+                    : prev
+            );
+        } catch (error) {
+            console.error("Failed to toggle save:", error);
+        }
+    };
+
+    const [commentLoading, setCommentLoading] = useState(false);
+    const handleAddComment = async () => {
+        if (!newcomment) return;
+        setCommentLoading(true);
+        try {
+            const res = await api.post(
+                API_ENDPOINTS.CONTENT.ADD_COMMENT(videoId),
+                { message: newcomment }
+            );
+
+            setComment((prev) => [...prev, res.data.comment]);
+            setNewComment("");
+        } catch (error) {
+            console.error(error);
+            toast.error("Try again!!");
+        } finally {
+            setCommentLoading(false);
+        }
+    };
+
+    const [replyLoading, setReplyLoading] = useState(false)
+    const handleReply = async (commentId, replyText) => {
+        if (!replyText) return;
+
+        setReplyLoading(true);
+        try {
+            const res = await api.post(
+                API_ENDPOINTS.CONTENT.ADD_REPLY(videoId, commentId),
+                { message: replyText }
+            );
+
+            setComment((prev) =>
+                prev.map((comment) =>
+                    comment._id === commentId
+                        ? {
+                            ...comment,
+                            replies: [...comment.replies, res.data.reply],
+                        }
+                        : comment
+                )
+            );
+        } catch (error) {
+            console.error(error);
+            toast.error("Try Again!!");
+        } finally {
+            setReplyLoading(false);
+        }
+    };
 
     return (
         <div className="flex bg-[#0f0f0f] text-white flex-col lg:flex-row gap-6 p-4 lg:p-6 min-h-screen">
@@ -332,6 +458,7 @@ function PlayVideo() {
                             label="Likes"
                             active={video?.likes?.includes(userData?._id)}
                             count={video?.likes?.length}
+                            onClick={toggleLike}
                         />
 
                         <IconButton
@@ -339,6 +466,7 @@ function PlayVideo() {
                             label="Dislikes"
                             active={video?.dislikes?.includes(userData?._id)}
                             count={video?.dislikes?.length}
+                            onClick={toggleDislike}
                         />
 
                         <IconButton
@@ -361,6 +489,7 @@ function PlayVideo() {
                             icon={FaBookmark}
                             label="Save"
                             active={video?.saveBy?.includes(userData?._id)}
+                            onClick={toggleSave}
                         />
                     </div>
                 </div>
@@ -373,8 +502,22 @@ function PlayVideo() {
                 <div className="mt-6">
                     <h2 className="text-lg font-semibold mb-3">Comments</h2>
                     <div className="flex gap-2 mb-4">
-                        <input type="text" placeholder="Add a comment..." className="flex-1 border border-gray-700 bg-[#1a1a1a] text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-orange-600" />
-                        <button className="bg-orange-600 text-white px-4 py-2 rounded-lg">Post</button>
+                        <input
+                            value={newcomment}
+                            onChange={(e) => setNewComment(e.target.value)}
+                            type="text"
+                            placeholder="Add a comment..."
+                            className="flex-1 border border-gray-700 bg-[#1a1a1a] text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-orange-600"
+                        />
+                        <button disabled={commentLoading} onClick={handleAddComment} className="bg-orange-600 text-white px-4 py-2 rounded-lg">{commentLoading ? <LoadingSpinner size={20} color="black" /> : "Post"}</button>
+                    </div>
+
+                    <div className="space-y-3">
+                        {comment?.map((cmt) => (
+                            <div key={cmt._id} className="p-3 bg-[#1a1a1a] rounded-lg shadow-sm text-sm">
+                                <p>{cmt?.message}</p>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>
