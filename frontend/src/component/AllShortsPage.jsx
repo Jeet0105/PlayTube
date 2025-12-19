@@ -19,6 +19,7 @@ function AllShortsPage() {
                             title={short?.title}
                             avatar={short?.channel?.avatar}
                             channelName={short?.channel?.name}
+                            id={short?._id}
                         />
                     </div>
                 ))
