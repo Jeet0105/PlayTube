@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import uploadOnCloudinary from "../config/cloudinary.js";
 import { asyncHandler } from "../middleware/errorHandler.js";
 import Channel from "../model/channel.model.js";
@@ -60,4 +61,303 @@ export const getAllShorts = asyncHandler(async (req, res) => {
         message: "Shorts retrieved successfully",
         shorts
     });
+});
+
+export const toggleLikeShort = asyncHandler(async (req, res) => {
+  const { shortId } = req.params;
+  const userId = req.userId;
+
+  if (!shortId) {
+    return res.status(400).json({ message: "ShortId is required." });
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(shortId)) {
+    return res.status(400).json({ message: "Invalid ShortId." });
+  }
+
+  const short = await Short.findById(shortId).select("likes dislikes");
+  if (!short) {
+    return res.status(404).json({ message: "Short not found." });
+  }
+
+  const hasLiked = short.likes.some(
+    id => id.toString() === userId
+  );
+
+  let updatedShort;
+
+  if (hasLiked) {
+    // Remove like
+    updatedShort = await Short.findByIdAndUpdate(
+      shortId,
+      { $pull: { likes: userId } },
+      { new: true }
+    ).select("likes dislikes");
+  } else {
+    // Add like & remove dislike
+    updatedShort = await Short.findByIdAndUpdate(
+      shortId,
+      {
+        $addToSet: { likes: userId },
+        $pull: { dislikes: userId }
+      },
+      { new: true }
+    ).select("likes dislikes");
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: hasLiked ? "Like removed" : "Video liked",
+    short: updatedShort
+  });
+});
+
+export const toggleDislikeShort = asyncHandler(async (req, res) => {
+  const { shortId } = req.params;
+  const userId = req.userId;
+
+  if (!shortId) {
+    return res.status(400).json({ message: "ShortId is required." });
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(shortId)) {
+    return res.status(400).json({ message: "Invalid ShortId." });
+  }
+
+  const short = await Short.findById(shortId).select("likes dislikes");
+  if (!short) {
+    return res.status(404).json({ message: "Short not found." });
+  }
+
+  const hasDisliked = short.dislikes.some(
+    id => id.toString() === userId
+  );
+
+  let updatedShort;
+
+  if (hasDisliked) {
+    // Remove dislike
+    updatedShort = await Short.findByIdAndUpdate(
+      shortId,
+      { $pull: { dislikes: userId } },
+      { new: true }
+    ).select("likes dislikes");
+  } else {
+    // Add dislike & remove like
+    updatedShort = await Short.findByIdAndUpdate(
+      shortId,
+      {
+        $addToSet: { dislikes: userId },
+        $pull: { likes: userId }
+      },
+      { new: true }
+    ).select("likes dislikes");
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: hasDisliked ? "Dislike removed" : "Video disliked",
+    short: updatedShort
+  });
+});
+
+export const toggleSaveShort = asyncHandler(async (req, res) => {
+  const { shortId } = req.params;
+  const userId = req.userId;
+
+  if (!shortId) {
+    return res.status(400).json({ message: "ShortId is required." });
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(shortId)) {
+    return res.status(400).json({ message: "Invalid ShortId." });
+  }
+
+  const short = await Short.findById(shortId).select("saveBy");
+  if (!short) {
+    return res.status(404).json({ message: "Short not found." });
+  }
+
+  const hasSaved = short.saveBy.some(
+    id => id.toString() === userId
+  );
+
+  const updatedShort = hasSaved
+    ? await Short.findByIdAndUpdate(
+        shortId,
+        { $pull: { saveBy: userId } },
+        { new: true }
+      ).select("saveBy")
+    : await Short.findByIdAndUpdate(
+        shortId,
+        { $addToSet: { saveBy: userId } },
+        { new: true }
+      ).select("saveBy");
+
+  return res.status(200).json({
+    success: true,
+    message: hasSaved ? "Short removed from saved" : "Short saved",
+    short: updatedShort
+  });
+});
+
+export const incrementViewShort = asyncHandler(async (req, res) => {
+  const { shortId } = req.params;
+
+  if (!shortId) {
+    return res.status(400).json({ message: "ShortId is required." });
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(shortId)) {
+    return res.status(400).json({ message: "Invalid ShortId." });
+  }
+
+  const short = await Short.findByIdAndUpdate(
+    shortId,
+    { $inc: { views: 1 } },
+    { new: true }
+  ).select("views");
+
+  if (!short) {
+    return res.status(404).json({ message: "Short not found." });
+  }
+
+  return res.status(200).json({
+    success: true,
+    views: short.views,
+  });
+});
+
+export const addCommentShort = asyncHandler(async (req, res) => {
+  const { shortId } = req.params;
+  const { message } = req.body;
+  const userId = req.userId;
+
+  if (!shortId) {
+    return res.status(400).json({ message: "ShortId is required." });
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(shortId)) {
+    return res.status(400).json({ message: "Invalid ShortId." });
+  }
+
+  if (!message || !message.trim()) {
+    return res.status(400).json({ message: "Comment message is required." });
+  }
+
+  const short = await Short.findById(shortId);
+  if (!short) {
+    return res.status(404).json({ message: "Short not found." });
+  }
+
+  const newComment = {
+    author: userId,
+    message: message.trim(),
+  };
+
+  short.comments.push(newComment);
+  await short.save();
+
+  // Populate only the newly added comment
+  const populatedShort = await Short.findById(shortId)
+    .populate({
+      path: "comments.author",
+      select: "username profilePictureUrl email",
+    })
+    .populate({
+      path: "comments.replies.author",
+      select: "username profilePictureUrl email",
+    });
+
+  const addedComment = populatedShort.comments.at(-1);
+
+  return res.status(201).json({
+    success: true,
+    message: "Comment added",
+    comment: addedComment,
+    populatedShort
+  });
+});
+
+export const addReplyShort = asyncHandler(async (req, res) => {
+  const { shortId, commentId } = req.params;
+  const { message } = req.body;
+  const userId = req.userId;
+
+  if (!shortId) {
+    return res.status(400).json({ message: "ShortId is required." });
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(shortId)) {
+    return res.status(400).json({ message: "Invalid ShortId." });
+  }
+
+  if (!message || !message.trim()) {
+    return res.status(400).json({ message: "Reply message is required." });
+  }
+
+  const short = await Short.findById(shortId);
+  if (!short) {
+    return res.status(404).json({ message: "Short not found." });
+  }
+
+  const comment = short.comments.id(commentId);
+  if (!comment) {
+    return res.status(404).json({ message: "Comment not found." });
+  }
+
+  const newReply = {
+    author: userId,
+    message: message.trim(),
+  };
+
+  comment.replies.push(newReply);
+  await short.save();
+
+  // Populate only the relevant fields for comments and replies
+  const populatedShort = await Short.findById(shortId)
+    .populate({
+      path: "comments.author",
+      select: "username profilePictureUrl email",
+    })
+    .populate({
+      path: "comments.replies.author",
+      select: "username profilePictureUrl email",
+    });
+
+  const addedReply = comment.replies.at(-1);
+
+  return res.status(201).json({
+    success: true,
+    message: "Reply added",
+    reply: addedReply,
+  });
+});
+
+export const getShortComments = asyncHandler(async (req, res) => {
+  const { shortId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(shortId)) {
+    return res.status(400).json({ message: "Invalid shortId" });
+  }
+
+  const short = await Short.findById(shortId)
+    .select("comments")
+    .populate({
+      path: "comments.author",
+      select: "username profilePictureUrl email",
+    })
+    .populate({
+      path: "comments.replies.author",
+      select: "username profilePictureUrl email",
+    });
+
+  if (!short) {
+    return res.status(404).json({ message: "Short not found" });
+  }
+
+  return res.status(200).json({
+    success: true,
+    comments: short.comments,
+  });
 });
