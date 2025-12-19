@@ -1,6 +1,8 @@
+import { Link } from "react-router-dom";
+
 function ShortCard({ shortUrl, title, channelName, avatar, views, id }) {
     return (
-        <div className="w-[120px] cursor-pointer text-white flex flex-col gap-2">
+        <Link to={`playshort/${id}`} className="w-[120px] cursor-pointer text-white flex flex-col gap-2">
             {/* Thumbnail */}
             <div className="rounded-xl overflow-hidden bg-black w-full h-[200px]">
                 <video
@@ -30,7 +32,7 @@ function ShortCard({ shortUrl, title, channelName, avatar, views, id }) {
                     <p className="text-xs text-gray-500 mt-1">{views} views</p>
                 )}
             </div>
-        </div>
+        </Link>
     );
 }
 
