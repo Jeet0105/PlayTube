@@ -38,6 +38,13 @@ export const API_ENDPOINTS = {
     INCREMENT_VIEW: (videoId) => `/api/v1/content/videos/${videoId}/views`,
     ADD_COMMENT: (videoId) => `/api/v1/content/videos/${videoId}/comments`,
     ADD_REPLY: (videoId, commentId) => `/api/v1/content/videos/${videoId}/comments/${commentId}/replies`,
+    LIKE_SHORT: (shortId) => `/api/v1/content/shorts/${shortId}/like`,
+    DISLIKE_SHORT: (shortId) => `/api/v1/content/shorts/${shortId}/dislike`,
+    SAVE_SHORT: (shortId) => `/api/v1/content/shorts/${shortId}/save`,
+    INCREMENT_VIEW_SHORT: (shortId) => `/api/v1/content/shorts/${shortId}/views`,
+    ADD_COMMENT_SHORT: (shortId) => `/api/v1/content/shorts/${shortId}/comments`,
+    ADD_REPLY_SHORT: (shortId, commentId) => `/api/v1/content/shorts/${shortId}/comments/${commentId}/replies`,
+    GET_SHORT_COMMENTS: (shortId) => `/api/v1/content/shorts/${shortId}/get-comments`,
   }
 };
 

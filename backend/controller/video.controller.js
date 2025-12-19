@@ -52,7 +52,20 @@ export const createVideo = asyncHandler(async (req, res) => {
 });
 
 export const getAllVideos = asyncHandler(async (req, res) => {
-  const videos = await Video.find().sort({ createdAt: -1 }).populate("channel");
+  const videos = await Video.find()
+    .sort({ createdAt: -1 })
+    .populate({
+      path: "channel",
+      select: "-__v"
+    })
+    .populate({
+      path: "comments.author",
+      select: "-password -resetOtp -otpExpires -isOtpVerified -__v"
+    })
+    .populate({
+      path: "comments.replies.author",
+      select: "-password -resetOtp -otpExpires -isOtpVerified -__v"
+    });
 
   if (videos.length === 0) {
     return res.status(404).json({
@@ -217,10 +230,21 @@ export const addComment = asyncHandler(async (req, res) => {
   video.comments.push(newComment);
   await video.save();
 
+  const populatedVideo = await Video.findById(videoId)
+    .populate({
+      path: "comments.author",
+      select: "username profilePictureUrl email"
+    })
+    .populate({
+      path: "comments.replies.author",
+      select: "username profilePictureUrl email"
+    })
+
   return res.status(201).json({
     success: true,
     message: "Comment added",
     comment: video.comments.at(-1),
+    populatedVideo
   });
 });
 
@@ -252,8 +276,20 @@ export const addReply = asyncHandler(async (req, res) => {
     message
   })
   await video.save();
+
+  const populatedVideo = await Video.findById(videoId)
+    .populate({
+      path: "comments.author",
+      select: "username profilePictureUrl email"
+    })
+    .populate({
+      path: "comments.replies.author",
+      select: "username profilePictureUrl email"
+    })
+
   return res.status(201).json({
     success: true,
     reply: comment.replies.at(-1),
+    populatedVideo
   });
 })

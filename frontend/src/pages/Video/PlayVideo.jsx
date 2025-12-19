@@ -180,7 +180,6 @@ function PlayVideo() {
 
     const handleSubscribe = async () => {
         if (!channel?._id || !userData?._id) {
-            console.log("test");
             return;
         }
 
@@ -275,7 +274,8 @@ function PlayVideo() {
 
     const [commentLoading, setCommentLoading] = useState(false);
     const handleAddComment = async () => {
-        if (!newcomment) return;
+        if (!newcomment.trim()) return;
+
         setCommentLoading(true);
         try {
             const res = await api.post(
@@ -293,6 +293,7 @@ function PlayVideo() {
         }
     };
 
+
     const [replyLoading, setReplyLoading] = useState(false)
     const handleReply = async (commentId, replyText) => {
         if (!replyText) return;
@@ -303,6 +304,8 @@ function PlayVideo() {
                 API_ENDPOINTS.CONTENT.ADD_REPLY(videoId, commentId),
                 { message: replyText }
             );
+            // console.log(res.data);
+
 
             setComment((prev) =>
                 prev.map((comment) =>
@@ -512,10 +515,26 @@ function PlayVideo() {
                         <button disabled={commentLoading} onClick={handleAddComment} className="bg-orange-600 text-white px-4 py-2 rounded-lg">{commentLoading ? <LoadingSpinner size={20} color="black" /> : "Post"}</button>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
                         {comment?.map((cmt) => (
                             <div key={cmt._id} className="p-3 bg-[#1a1a1a] rounded-lg shadow-sm text-sm">
-                                <p>{cmt?.message}</p>
+                                <div className="flex items-center justify-start gap-1">
+                                    <img src={cmt?.author?.profilePictureUrl} className="w-8 h-8 rounded-full object-cover" />
+                                    <h2 className="text-[13px]">@{cmt?.author?.username?.toLowerCase()}</h2>
+                                </div>
+                                <p className="font-medium p-5">{cmt?.message}</p>
+                                <div className="ml-4 mt-2 space-y-2">
+                                    {cmt.replies?.map((reply) => (
+                                        <div key={reply._id} className="p-2 bg-[#2a2a2a] rounded">
+                                            <div className="flex items-center justify-start gap-1">
+                                                <img src={reply.author.profilePictureUrl} className="w-6 h-6 rounded-full object-cover" />
+                                                <h2 className="text-[13px]">@{reply?.author?.username?.toLowerCase()}</h2>
+                                                <p className="px-5 py-5">{reply?.message}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <ReplySection comment={cmt} handleReply={handleReply} loading={replyLoading} />
                             </div>
                         ))}
                     </div>
@@ -571,6 +590,37 @@ function PlayVideo() {
 
         </div>
     );
+}
+
+const ReplySection = ({ comment, handleReply, loading }) => {
+    const [replyText, setReplyText] = useState("");
+    const [showReplyInput, setShowReplyInput] = useState(false);
+    return (
+        <div className="mt-3">
+            {showReplyInput &&
+                <div className="flex gap-2 mt-1 ml-4">
+                    <input
+                        type="text"
+                        className="flex-1 border border-gray-700 bg-[#1a1a1a] text-white rounded-lg px-2 py-2 focus:outline-none focus:ring focus:ring-orange-600 text-sm"
+                        placeholder="Add a reply..."
+                        onChange={(e) => setReplyText(e.target.value)}
+                        value={replyText}
+                    />
+                    <button
+                        disabled={loading}
+                        className="bg-orange-600 hover:bg-orange-700 text-white px-3 rounded-lg text-sm"
+                        onClick={() => { handleReply(comment._id, replyText); setShowReplyInput(false); setReplyText("") }}
+                    >{loading ? <LoadingSpinner size={20} /> : "Reply"}</button>
+                </div>
+            }
+            <button
+                onClick={() => setShowReplyInput(!showReplyInput)}
+                className="ml-4 text-xs text-gray-400 mt-1"
+            >
+                Reply
+            </button>
+        </div>
+    )
 }
 
 const IconButton = ({ icon: Icon, active, label, count, onClick }) => {

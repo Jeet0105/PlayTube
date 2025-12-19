@@ -2,7 +2,7 @@ import express from "express";
 import { verifyUser } from "../middleware/verifyUser.js";
 import { addComment, addReply, createVideo, getAllVideos, incrementView, toggleDislike, toggleLike, toggleSave } from "../controller/video.controller.js";
 import { uploadBoth } from '../middleware/multer.js';
-import { createShort, getAllShorts } from "../controller/short.controller.js";
+import { addCommentShort, addReplyShort, createShort, getAllShorts, getShortComments, incrementViewShort, toggleDislikeShort, toggleLikeShort, toggleSaveShort } from "../controller/short.controller.js";
 
 const router = express.Router();
 
@@ -32,5 +32,13 @@ router.post(
     createShort
 );
 router.get("/getallshorts", verifyUser, getAllShorts);
+router.patch("/shorts/:shortId/like", verifyUser, toggleLikeShort);
+router.patch("/shorts/:shortId/dislike", verifyUser, toggleDislikeShort);
+router.patch("/shorts/:shortId/save", verifyUser, toggleSaveShort);
+router.patch("/shorts/:shortId/views", incrementViewShort);
+router.post("/shorts/:shortId/comments", verifyUser, addCommentShort);
+router.post("/shorts/:shortId/comments/:commentId/replies", verifyUser, addReplyShort);
+router.get("/shorts/:shortId/get-comments",  verifyUser, getShortComments);
+
 
 export default router;
