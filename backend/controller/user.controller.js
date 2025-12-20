@@ -270,3 +270,26 @@ export const toggleSubscribe = asyncHandler(async (req, res) => {
         channel
     });
 });
+
+export const getAllChannelData = asyncHandler(async (req, res) => {
+    const channels = await Channel.find()
+        .populate({
+            path: "owner",
+            select: "username profilePictureUrl channel"
+        })
+        .populate("video")
+        .populate("shorts")
+
+    if (!channels.length) {
+        return res.status(404).json({
+            success: false,
+            message: "No channels found",
+        });
+    }
+
+    return res.status(200).json({
+        success: true,
+        message: "Channels fetched successfully",
+        channels,
+    });
+});

@@ -3,6 +3,8 @@ import { verifyUser } from "../middleware/verifyUser.js";
 import { addComment, addReply, createVideo, getAllVideos, incrementView, toggleDislike, toggleLike, toggleSave } from "../controller/video.controller.js";
 import { uploadBoth } from '../middleware/multer.js';
 import { addCommentShort, addReplyShort, createShort, getAllShorts, getShortComments, incrementViewShort, toggleDislikeShort, toggleLikeShort, toggleSaveShort } from "../controller/short.controller.js";
+import { createPlaylist, toggleSavePlaylist } from "../controller/playlist.controller.js";
+import { addCommentPost, addReplyPost, CreatePost, getAllPosts, toggleLikePost } from "../controller/post.controller.js";
 
 const router = express.Router();
 
@@ -38,7 +40,22 @@ router.patch("/shorts/:shortId/save", verifyUser, toggleSaveShort);
 router.patch("/shorts/:shortId/views", incrementViewShort);
 router.post("/shorts/:shortId/comments", verifyUser, addCommentShort);
 router.post("/shorts/:shortId/comments/:commentId/replies", verifyUser, addReplyShort);
-router.get("/shorts/:shortId/get-comments",  verifyUser, getShortComments);
+router.get("/shorts/:shortId/get-comments", verifyUser, getShortComments);
+
+// PlayList Routes
+router.post("/create-plalist", verifyUser, createPlaylist);
+router.post("/playlist/save",verifyUser,toggleSavePlaylist);
+
+// Post Routes
+router.post(
+    "/create-post",
+    uploadBoth.single("image"),
+    CreatePost
+);
+router.get("/getPosts",getAllPosts);
+router.post("/post/like",toggleLikePost);
+router.post("/post/comments", verifyUser,addCommentPost);
+router.post("/post/comments/replies", verifyUser,addReplyPost);
 
 
 export default router;
