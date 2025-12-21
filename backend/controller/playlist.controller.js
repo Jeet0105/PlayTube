@@ -21,7 +21,7 @@ export const createPlaylist = asyncHandler(async (req, res) => {
             message: "Channel not found",
         });
     }
-
+    
     // Ensure all videos exist and belong to the channel
     if (videoIds?.length) {
         const videos = await Video.countDocuments({
@@ -44,7 +44,7 @@ export const createPlaylist = asyncHandler(async (req, res) => {
         description,
         thumbnail,
         visibility,
-        videos: videoIds || [],
+        video: videoIds,
     });
 
     // Add playlist to channel

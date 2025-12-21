@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
     FaPlay,
@@ -185,14 +185,11 @@ function PlayVideo() {
 
         setLoading(true);
         try {
-            const res = await api.post(
+            await api.post(
                 API_ENDPOINTS.USER.SUBSCRIBE,
                 { channelId: channel._id },
                 { withCredentials: true }
             );
-
-            // setChannel(res.data.channel);
-            // dispatch(setChannelData(res.data.channel));
         } catch (error) {
             console.error(error);
             toast.error("Try again!");
@@ -436,7 +433,7 @@ function PlayVideo() {
                 </h1>
                 <p className="text-sm text-gray-400">{video?.views} views</p>
                 <div className="flex flex-wrap items-center justify-between mt-2">
-                    <div className="flex items-center justify-start gap-4">
+                    <Link to={`/channelpage/${channel?._id}`} className="flex items-center justify-start gap-4">
                         <img src={channel?.avatar} className="w-12 h-12 rounded-full border-2 border-gray-600" alt="Channel Avatar" />
                         <div>
                             <h1 className="text-md font-bold">{channel?.name}</h1>
@@ -453,7 +450,7 @@ function PlayVideo() {
                         >
                             {isSubscribed ? "Subscribed" : "Subscribe"}
                         </button>
-                    </div>
+                    </Link>
 
                     <div className="flex items-center gap-6 mt-3">
                         <IconButton

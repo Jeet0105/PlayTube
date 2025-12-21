@@ -26,6 +26,7 @@ export const API_ENDPOINTS = {
     GET_CHANNEL: "/api/v1/user/get-channel",
     UPDATE_CHANNEL: "/api/v1/user/updatechannel",
     SUBSCRIBE: "/api/v1/user/togglesubscribe",
+    GET_ALL_CHANNEL: "/api/v1/user/allchannel",
   },
   CONTENT: {
     Create_Video: "/api/v1/content/create-video",
@@ -45,6 +46,8 @@ export const API_ENDPOINTS = {
     ADD_COMMENT_SHORT: (shortId) => `/api/v1/content/shorts/${shortId}/comments`,
     ADD_REPLY_SHORT: (shortId, commentId) => `/api/v1/content/shorts/${shortId}/comments/${commentId}/replies`,
     GET_SHORT_COMMENTS: (shortId) => `/api/v1/content/shorts/${shortId}/get-comments`,
+    CREATE_PLAYLIST: "/api/v1/content/create-playlist",
+    CREATE_POST : "/api/v1/content/create-post",
   }
 };
 
