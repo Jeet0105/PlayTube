@@ -114,6 +114,7 @@ export const getChannelData = asyncHandler(async (req, res) => {
 
     const channel = await Channel.findOne({ owner: userId })
         .populate("owner", "-password -resetOtp -otpExpires -isOtpVerified")
+        .populate("video")
         .select("+subscriberCount");
 
     if (!channel) {
@@ -279,6 +280,24 @@ export const getAllChannelData = asyncHandler(async (req, res) => {
         })
         .populate("video")
         .populate("shorts")
+        .populate({
+            path: "communityPosts",
+            populate: {
+                path: "channel",
+                model: "Channel"
+            }
+        })
+        .populate({
+            path: "playlist",
+            populate: {
+                path: "video",
+                model: "Video",
+                populate: {
+                    path: "channel",
+                    model: "Channel"
+                }
+            }
+        })
 
     if (!channels.length) {
         return res.status(404).json({

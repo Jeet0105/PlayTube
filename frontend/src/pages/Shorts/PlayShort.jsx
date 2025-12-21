@@ -14,7 +14,7 @@ import api from "../../utils/axios";
 import { API_ENDPOINTS } from "../../utils/constants";
 import { toast } from "react-toastify";
 import LoadingSpinner from "../../components/LoadingSpinner";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 function shuffleArray(array, shortId) {
     if (!Array.isArray(array) || !shortId) return array;
@@ -49,6 +49,8 @@ function PlayShort() {
 
     const videoRefs = useRef({});
     const currentVideoRef = useRef(null);
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (!allShortData?.length) return;
@@ -325,8 +327,9 @@ function PlayShort() {
                                         src={short?.channel?.avatar}
                                         alt={short?.channel?.name}
                                         className="w-8 h-8 rounded-full border border-gray-600"
+                                        onClick={()=>navigate(`/channelpage/${short?.channel?._id}`)}
                                     />
-                                    <span className="font-semibold text-gray-200">
+                                    <span onClick={()=>navigate(`/channelpage/${short?.channel?._id}`)} className="font-semibold text-gray-200">
                                         @{short?.channel?.name}
                                     </span>
                                     <button

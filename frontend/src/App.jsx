@@ -27,6 +27,7 @@ const CreatePlayList = lazy(() => import("./pages/Playlist/CreatePlayList"))
 const CreatePost = lazy(() => import("./pages/Post/CreatePost"))
 const PlayVideo = lazy(() => import("./pages/Video/PlayVideo"))
 const PlayShort = lazy(()=>import("./pages/Shorts/PlayShort"))
+const ChannelPage = lazy(()=>import("./pages/Channel/ChannelPage"))
 
 function App() {
   GetCurrentUser();
@@ -53,6 +54,7 @@ function App() {
             <Route path="create-playlist" element={<ProtectRoute requireChannel><CreatePlayList /></ProtectRoute>} />
             <Route path="create-post" element={<ProtectRoute requireChannel><CreatePost /></ProtectRoute>} />
             <Route path="playshort/:shortId" element={<ProtectRoute><PlayShort /></ProtectRoute>} />
+            <Route path="channelpage/:channelId" element={<ProtectRoute><ChannelPage /></ProtectRoute>} />
           </Route>
 
           {/* Protected Routes */}

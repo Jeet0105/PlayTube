@@ -4,46 +4,56 @@ import Channel from "../model/channel.model.js";
 import Post from "../model/post.model.js";
 
 export const CreatePost = asyncHandler(async (req, res) => {
-    const { channelId, content } = req.body;
-    const file = req.file;
+  const { content } = req.body;
+  const file = req.file;
 
-    if (!channelId || !content) {
-        return res.status(400).json({
-            success: false,
-            message: "ChannelId and content are required."
-        });
+  if (!content?.trim()) {
+    return res.status(400).json({
+      success: false,
+      message: "Post content is required.",
+    });
+  }
+
+  const channel = await Channel.findOne({ owner: req.userId });
+  if (!channel) {
+    return res.status(404).json({
+      success: false,
+      message: "Channel not found.",
+    });
+  }
+
+  let imageUrl = null;
+
+  if (file) {
+    const uploadedImage = await uploadOnCloudinary(file.path);
+
+    if (!uploadedImage?.secure_url) {
+      return res.status(500).json({
+        success: false,
+        message: "Image upload failed.",
+      });
     }
 
-    const channel = await Channel.findById(channelId);
-    if (!channel) {
-        return res.status(404).json({
-            success: false,
-            message: "Channel not found."
-        });
-    }
+    imageUrl = uploadedImage.secure_url;
+  }
 
-    let imageUrl = null;
+  const post = await Post.create({
+    channel: channel._id,
+    image: imageUrl,
+    content,
+  });
 
-    if (file) {
-        const uploadedImage = await uploadOnCloudinary(file.path);
-        imageUrl = uploadedImage?.secure_url || null;
-    }
+  await Channel.findByIdAndUpdate(
+    channel._id,
+    { $push: { communityPosts: post._id } },
+    { new: true }
+  );
 
-    const post = await Post.create({
-        channel: channelId,
-        image: imageUrl,
-        content
-    });
-
-    await Channel.findByIdAndUpdate(channelId, {
-        $push: { communityPosts: post._id }
-    });
-
-    return res.status(201).json({
-        success: true,
-        message: "Post created successfully.",
-        post
-    });
+  return res.status(201).json({
+    success: true,
+    message: "Post created successfully.",
+    post,
+  });
 });
 
 export const getAllPosts = asyncHandler(async (req, res) => {

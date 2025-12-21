@@ -43,12 +43,13 @@ router.post("/shorts/:shortId/comments/:commentId/replies", verifyUser, addReply
 router.get("/shorts/:shortId/get-comments", verifyUser, getShortComments);
 
 // PlayList Routes
-router.post("/create-plalist", verifyUser, createPlaylist);
+router.post("/create-playlist", verifyUser, createPlaylist);
 router.post("/playlist/save",verifyUser,toggleSavePlaylist);
 
 // Post Routes
 router.post(
     "/create-post",
+    verifyUser,
     uploadBoth.single("image"),
     CreatePost
 );
