@@ -134,7 +134,7 @@ function UpdateChannel() {
     const inputClasses =
         "w-full bg-[#1c1c1c] border border-white/10 rounded-2xl px-4 py-3 text-white placeholder:text-gray-400 focus:border-orange-500 focus:outline-none transition";
 
-    return (
+  return (
         <PageShell contentClassName="flex items-center justify-center min-h-screen">
             <SurfaceCard
                 size="md"

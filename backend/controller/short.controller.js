@@ -361,3 +361,45 @@ export const getShortComments = asyncHandler(async (req, res) => {
     comments: short.comments,
   });
 });
+
+export const getLikedShort = asyncHandler(async (req, res) => {
+  const userId = req.userId;
+
+  const likedShorts = await Short.find({ likes: userId })
+    .populate("channel", "name avatar")
+    .populate("likes", "username")
+  
+  if (likedShorts.length === 0) {
+    return res.status(404).json({
+      success: false,
+      message: "No liked short found"
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: "Liked shorts fetched successfully",
+    likedShorts
+  });
+});
+
+export const getSavedShorts = asyncHandler(async (req, res) => {
+  const userId = req.userId;
+
+  const savedShorts = await Short.find({ saveBy: userId })
+    .populate("channel", "name avatar")
+    .populate("saveBy", "username")
+
+  if (savedShorts.length === 0) {
+    return res.status(404).json({
+      success: false,
+      message: "No saved short found"
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: "Saved shorts fetched successfully",
+    savedShorts
+  });
+})

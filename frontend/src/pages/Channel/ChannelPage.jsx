@@ -8,6 +8,7 @@ import LoadingSpinner from "../../components/LoadingSpinner";
 import VideoCard from "../../component/VideoCard";
 import ShortCard from "../../component/ShortCard";
 import PlaylistCard from "../../component/PlaylistCard";
+import PostCard from "../../component/PostCard";
 
 function ChannelPage() {
     const { channelId } = useParams();
@@ -276,7 +277,19 @@ function ChannelPage() {
                         </div>
                     )}
                     {activeTab === "community" && (
-                        <p className="text-gray-500 text-center w-full mt-10">Community posts coming soon!</p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 pb-10">
+                            {channel.communityPosts?.length ? (
+                                channel.communityPosts.map((p) => (
+                                    <PostCard
+                                        key={p._id}
+                                        post={p}
+                                    />
+                                    
+                                ))
+                            ) : (
+                                <p className="text-gray-500 text-center w-full mt-10">No playlists yet.</p>
+                            )}
+                        </div>
                     )}
                 </div>
             </div>

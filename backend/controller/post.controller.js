@@ -4,56 +4,48 @@ import Channel from "../model/channel.model.js";
 import Post from "../model/post.model.js";
 
 export const CreatePost = asyncHandler(async (req, res) => {
-  const { content } = req.body;
-  const file = req.file;
-
-  if (!content?.trim()) {
-    return res.status(400).json({
-      success: false,
-      message: "Post content is required.",
-    });
-  }
-
-  const channel = await Channel.findOne({ owner: req.userId });
-  if (!channel) {
-    return res.status(404).json({
-      success: false,
-      message: "Channel not found.",
-    });
-  }
-
-  let imageUrl = null;
-
-  if (file) {
-    const uploadedImage = await uploadOnCloudinary(file.path);
-
-    if (!uploadedImage?.secure_url) {
-      return res.status(500).json({
-        success: false,
-        message: "Image upload failed.",
-      });
+    const { content } = req.body;
+    const file = req.file;
+    if (!content?.trim()) {
+        return res.status(400).json({
+            success: false,
+            message: "Post content is required.",
+        });
     }
 
-    imageUrl = uploadedImage.secure_url;
-  }
+    const channel = await Channel.findOne({ owner: req.userId });
+    if (!channel) {
+        return res.status(404).json({
+            success: false,
+            message: "Channel not found.",
+        });
+    }
 
-  const post = await Post.create({
-    channel: channel._id,
-    image: imageUrl,
-    content,
-  });
+    let imageUrl;
 
-  await Channel.findByIdAndUpdate(
-    channel._id,
-    { $push: { communityPosts: post._id } },
-    { new: true }
-  );
+    if (file) {
+        const uploadedImage = await uploadOnCloudinary(file.path);
 
-  return res.status(201).json({
-    success: true,
-    message: "Post created successfully.",
-    post,
-  });
+        imageUrl = uploadedImage;
+    }
+
+    const post = await Post.create({
+        channel: channel._id,
+        image: imageUrl,
+        content,
+    });
+
+    await Channel.findByIdAndUpdate(
+        channel._id,
+        { $push: { communityPosts: post._id } },
+        { new: true }
+    );
+
+    return res.status(201).json({
+        success: true,
+        message: "Post created successfully.",
+        post,
+    });
 });
 
 export const getAllPosts = asyncHandler(async (req, res) => {
@@ -84,43 +76,40 @@ export const toggleLikePost = asyncHandler(async (req, res) => {
     const userId = req.userId;
 
     if (!postId) {
-        return res.status(400).json({
-            success: false,
-            message: "PostId is required."
-        });
+        return res.status(400).json({ success: false, message: "PostId is required." });
     }
 
     const post = await Post.findById(postId);
     if (!post) {
-        return res.status(404).json({
-            success: false,
-            message: "Post not found."
-        });
+        return res.status(404).json({ success: false, message: "Post not found." });
     }
 
-    const hasLiked = post.likes.some(
-        id => id.toString() === userId.toString()
-    );
+    // Ensure arrays exist
+    post.likes = Array.isArray(post.likes) ? post.likes : [];
+    post.dislikes = Array.isArray(post.dislikes) ? post.dislikes : [];
+
+    // Check if user has already liked
+    const hasLiked = post.likes.some((id) => id && id.toString() === userId.toString());
+    let liked;
 
     if (hasLiked) {
-        // remove like
-        post.likes = post.likes.filter(
-            id => id.toString() !== userId.toString()
-        );
+        // Remove like safely
+        post.likes = post.likes.filter((id) => id && id.toString() !== userId.toString());
+        liked = false;
     } else {
-        // add like & remove dislike if present
+        // Add like safely
         post.likes.push(userId);
-        post.dislikes = post.dislikes.filter(
-            id => id.toString() !== userId.toString()
-        );
+        // Optional: remove from dislikes
+        post.dislikes = post.dislikes.filter((id) => id && id.toString() !== userId.toString());
+        liked = true;
     }
 
     await post.save();
 
     return res.status(200).json({
         success: true,
-        message: hasLiked ? "Like removed" : "Post liked",
-        post
+        liked,
+        likeCount: post.likes.length,
     });
 });
 
@@ -168,10 +157,12 @@ export const addCommentPost = asyncHandler(async (req, res) => {
             select: "username profilePictureUrl email"
         });
 
+    const latestComment = populatedPost.comments[populatedPost.comments.length - 1];
+
     return res.status(201).json({
         success: true,
         message: "Comment added successfully.",
-        comment: post.comments[post.comments.length - 1],
+        comment: latestComment,
         populatedPost
     });
 });

@@ -192,7 +192,7 @@ function Home() {
                             open={sidebarOpen}
                             selected={selectedItem}
                             setSelected={setSelectedItem}
-                            onClick={() => !userData && navigate("/")}
+                            onClick={() => userData && navigate("/savedcontent")}
                         />
                         <SidebarItem
                             icon={<FaThumbsUp />}
@@ -200,7 +200,7 @@ function Home() {
                             open={sidebarOpen}
                             selected={selectedItem}
                             setSelected={setSelectedItem}
-                            onClick={() => !userData && navigate("/")}
+                            onClick={() => userData && navigate("/likedcontent")}
                         />
                     </nav>
                 </aside >

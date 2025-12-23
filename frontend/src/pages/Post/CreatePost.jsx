@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setChannelData } from "../../redux/userSlice";
+import LoadingSpinner from "../../components/LoadingSpinner";
 
 function CreatePost() {
   const [content, setContent] = useState("");
@@ -19,10 +20,22 @@ function CreatePost() {
   const handleCreatePost = async () => {
     setLoading(true);
     try {
-      const res = await api.post(API_ENDPOINTS.CONTENT.CREATE_POST, {
-        content,
-        image
-      })
+      const formData = new FormData();
+      formData.append("content", content);
+      if (image) {
+        formData.append("image", image);
+      }
+
+      const res = await api.post(
+        API_ENDPOINTS.CONTENT.CREATE_POST,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
       dispatch(
         setChannelData({
           ...(channelData || {}),
@@ -32,15 +45,16 @@ function CreatePost() {
           ],
         })
       );
-      toast.success("Post Created!!")
-      navigate("/")
+
+      toast.success("Post Created!!");
+      navigate("/");
     } catch (error) {
       console.log(error);
-      toast.error("Something went wrong. Try again.")
+      toast.error("Something went wrong. Try again.");
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
     <div className='w-full min-h-screen bg-[#0f0f0f] text-white flex flex-col pt-5 items-center justify-center'>

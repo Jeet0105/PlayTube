@@ -47,7 +47,15 @@ export const API_ENDPOINTS = {
     ADD_REPLY_SHORT: (shortId, commentId) => `/api/v1/content/shorts/${shortId}/comments/${commentId}/replies`,
     GET_SHORT_COMMENTS: (shortId) => `/api/v1/content/shorts/${shortId}/get-comments`,
     CREATE_PLAYLIST: "/api/v1/content/create-playlist",
-    CREATE_POST : "/api/v1/content/create-post",
+    CREATE_POST: "/api/v1/content/create-post",
+    SAVE_PLAYLIST: "/api/v1/content/playlist/save",
+    POST_LIKE: "/api/v1/content/post/like",
+    POST_COMMENT: "/api/v1/content/post/comments",
+    POST_REPLY: "/api/v1/content/post/comments/replies",
+    GET_LIKED_VIDEO: "/api/v1/content/getlikedvideo",
+    GET_LIKED_SHORT: "/api/v1/content/getlikedshort",
+    GET_SAVED_VIDEO: "/api/v1/content/getsavedvideo",
+    GET_SAVED_SHORT: "/api/v1/content/getsavedshort",
   }
 };
 
