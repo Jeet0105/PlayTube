@@ -293,3 +293,45 @@ export const addReply = asyncHandler(async (req, res) => {
     populatedVideo
   });
 })
+
+export const getLikedVideo = asyncHandler(async (req, res) => {
+  const userId = req.userId;
+
+  const likedVideos = await Video.find({ likes: userId })
+    .populate("channel", "name avatar")
+    .populate("likes", "username")
+
+  if (likedVideos.length === 0) {
+    return res.status(404).json({
+      success: false,
+      message: "No liked videos found"
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: "Liked videos fetched successfully",
+    likedVideos
+  });
+});
+
+export const getSavedVideos = asyncHandler(async (req, res) => {
+  const userId = req.userId;
+
+  const savedVideos = await Video.find({ saveBy: userId })
+    .populate("channel", "name avatar")
+    .populate("saveBy", "username")
+
+  if (savedVideos.length === 0) {
+    return res.status(404).json({
+      success: false,
+      message: "No saved videos found"
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: "Saved videos fetched successfully",
+    savedVideos
+  });
+})

@@ -1,8 +1,8 @@
 import express from "express";
 import { verifyUser } from "../middleware/verifyUser.js";
-import { addComment, addReply, createVideo, getAllVideos, incrementView, toggleDislike, toggleLike, toggleSave } from "../controller/video.controller.js";
+import { addComment, addReply, createVideo, getAllVideos, getLikedVideo, getSavedVideos, incrementView, toggleDislike, toggleLike, toggleSave } from "../controller/video.controller.js";
 import { uploadBoth } from '../middleware/multer.js';
-import { addCommentShort, addReplyShort, createShort, getAllShorts, getShortComments, incrementViewShort, toggleDislikeShort, toggleLikeShort, toggleSaveShort } from "../controller/short.controller.js";
+import { addCommentShort, addReplyShort, createShort, getAllShorts, getLikedShort, getSavedShorts, getShortComments, incrementViewShort, toggleDislikeShort, toggleLikeShort, toggleSaveShort } from "../controller/short.controller.js";
 import { createPlaylist, toggleSavePlaylist } from "../controller/playlist.controller.js";
 import { addCommentPost, addReplyPost, CreatePost, getAllPosts, toggleLikePost } from "../controller/post.controller.js";
 
@@ -25,6 +25,8 @@ router.patch("/videos/:videoId/save", verifyUser, toggleSave);
 router.patch("/videos/:videoId/views", incrementView);
 router.post("/videos/:videoId/comments", verifyUser, addComment);
 router.post("/videos/:videoId/comments/:commentId/replies", verifyUser, addReply);
+router.get("/getlikedvideo", verifyUser, getLikedVideo);
+router.get("/getsavedvideo", verifyUser, getSavedVideos);
 
 // Short Routes
 router.post(
@@ -41,10 +43,12 @@ router.patch("/shorts/:shortId/views", incrementViewShort);
 router.post("/shorts/:shortId/comments", verifyUser, addCommentShort);
 router.post("/shorts/:shortId/comments/:commentId/replies", verifyUser, addReplyShort);
 router.get("/shorts/:shortId/get-comments", verifyUser, getShortComments);
+router.get("/getlikedshort", verifyUser, getLikedShort);
+router.get("/getsavedshort", verifyUser, getSavedShorts);
 
 // PlayList Routes
 router.post("/create-playlist", verifyUser, createPlaylist);
-router.post("/playlist/save",verifyUser,toggleSavePlaylist);
+router.post("/playlist/save", verifyUser, toggleSavePlaylist);
 
 // Post Routes
 router.post(
@@ -53,10 +57,10 @@ router.post(
     uploadBoth.single("image"),
     CreatePost
 );
-router.get("/getPosts",getAllPosts);
-router.post("/post/like",toggleLikePost);
-router.post("/post/comments", verifyUser,addCommentPost);
-router.post("/post/comments/replies", verifyUser,addReplyPost);
+router.get("/getPosts", getAllPosts);
+router.post("/post/like", toggleLikePost);
+router.post("/post/comments", verifyUser, addCommentPost);
+router.post("/post/comments/replies", verifyUser, addReplyPost);
 
 
 export default router;

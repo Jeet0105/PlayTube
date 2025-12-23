@@ -29,7 +29,7 @@ function MobileProfile() {
     const handleSignOut = async () => {
         // Prevent multiple simultaneous calls
         if (isSigningOut) return;
-        
+
         setIsSigningOut(true);
         try {
             const res = await api.get(API_ENDPOINTS.AUTH.SIGNOUT);
@@ -40,6 +40,7 @@ function MobileProfile() {
             }
         } catch (error) {
             // Error is handled by axios interceptor
+            console.log(error);
         } finally {
             setIsSigningOut(false);
         }
@@ -83,7 +84,7 @@ function MobileProfile() {
                             <span className="text-gray-400 text-sm truncate">{userData?.email}</span>
                             <button
                                 className="text-sm text-orange-400 hover:text-orange-300 transition mt-1 text-left"
-                                onClick={()=>{userData?.channel ? navigate("/viewchannel") : navigate("/createchannel")}}
+                                onClick={() => { userData?.channel ? navigate("/viewchannel") : navigate("/createchannel") }}
                             >
                                 {userData?.channel ? "View Channel" : "Create Channel"}
                             </button>
@@ -94,27 +95,27 @@ function MobileProfile() {
                 {/* auth buttons */}
                 {!userData && (
                     <div className="flex flex-col gap-2 p-4 border-b border-white/10">
-                        <button 
+                        <button
                             className="bg-[#1c1c1c] border border-white/10 hover:bg-white/5 text-white px-4 py-3 rounded-2xl text-sm flex items-center justify-center gap-2 transition"
                             onClick={handleGoogleAuth}
                         >
-                            <FcGoogle className="text-xl"/>
+                            <FcGoogle className="text-xl" />
                             <span>Sign In With Google</span>
                         </button>
 
-                        <button 
+                        <button
                             className="bg-[#1c1c1c] border border-white/10 hover:bg-white/5 text-white px-4 py-3 rounded-2xl text-sm flex items-center justify-center gap-2 transition"
-                            onClick={()=>navigate('/signup')}
+                            onClick={() => navigate('/signup')}
                         >
-                            <TiUserAddOutline className="text-xl"/>
+                            <TiUserAddOutline className="text-xl" />
                             <span>Create New Account</span>
                         </button>
 
-                        <button 
+                        <button
                             className="bg-[#1c1c1c] border border-white/10 hover:bg-white/5 text-white px-4 py-3 rounded-2xl text-sm flex items-center justify-center gap-2 transition"
-                            onClick={()=>navigate('/signin')}
+                            onClick={() => navigate('/signin')}
                         >
-                            <MdOutlineSwitchAccount className="text-xl"/>
+                            <MdOutlineSwitchAccount className="text-xl" />
                             <span>Sign In With Other Account</span>
                         </button>
                     </div>
@@ -125,19 +126,19 @@ function MobileProfile() {
                         <div className="flex flex-col mt-4 gap-1 px-2">
                             <ProfileMenuItem icon={<FaHistory />} label="History" />
                             <ProfileMenuItem icon={<FaList />} label="Playlist" />
-                            <ProfileMenuItem icon={<GoVideo />} label="Saved Videos" />
-                            <ProfileMenuItem icon={<FaThumbsUp />} label="Liked Videos" />
+                            <ProfileMenuItem icon={<GoVideo />} label="Saved Videos" onClick={() => navigate("/savedcontent")} />
+                            <ProfileMenuItem icon={<FaThumbsUp />} label="Liked Videos" onClick={() => navigate("/likedcontent")} />
                             {userData?.channel && (
                                 <ProfileMenuItem icon={<SiYoutubestudio className="text-orange-400" />} label="PT Studio" />
                             )}
                         </div>
                         <div className="h-px w-full bg-white/10 my-2" />
-                        <button 
+                        <button
                             className="bg-[#1c1c1c] border border-red-500/20 hover:bg-red-500/10 text-red-400 px-4 py-3 rounded-2xl text-sm flex items-center justify-center gap-2 transition mx-2 disabled:opacity-50 disabled:cursor-not-allowed"
                             onClick={handleSignOut}
                             disabled={isSigningOut}
                         >
-                            <FiLogOut className="text-xl"/>
+                            <FiLogOut className="text-xl" />
                             <span>{isSigningOut ? "Signing out..." : "Sign Out"}</span>
                         </button>
                     </>
