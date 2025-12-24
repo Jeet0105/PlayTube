@@ -4,58 +4,58 @@ import Video from "../model/video.model.js";
 import { asyncHandler } from "../middleware/errorHandler.js";
 
 export const createPlaylist = asyncHandler(async (req, res) => {
-    const { title, description, thumbnail, videoIds, visibility } = req.body;
+  const { title, description, thumbnail, videoIds, visibility } = req.body;
 
-    if (!title?.trim()) {
-        return res.status(400).json({
-            success: false,
-            message: "Playlist title is required",
-        });
-    }
+  if (!title?.trim()) {
+    return res.status(400).json({
+      success: false,
+      message: "Playlist title is required",
+    });
+  }
 
-    // Find channel and ensure it exists
-    const channel = await Channel.findOne({ owner: req.userId });
-    if (!channel) {
-        return res.status(404).json({
-            success: false,
-            message: "Channel not found",
-        });
-    }
-    
-    // Ensure all videos exist and belong to the channel
-    if (videoIds?.length) {
-        const videos = await Video.countDocuments({
-            _id: { $in: videoIds },
-            channel: channel._id,
-        });
+  // Find channel and ensure it exists
+  const channel = await Channel.findOne({ owner: req.userId });
+  if (!channel) {
+    return res.status(404).json({
+      success: false,
+      message: "Channel not found",
+    });
+  }
 
-        if (videos !== videoIds.length) {
-            return res.status(404).json({
-                success: false,
-                message: "Some videos not found in your channel",
-            });
-        }
-    }
-
-    // Create playlist
-    const playlist = await Playlist.create({
-        channel: channel._id,
-        title,
-        description,
-        thumbnail,
-        visibility,
-        video: videoIds,
+  // Ensure all videos exist and belong to the channel
+  if (videoIds?.length) {
+    const videos = await Video.countDocuments({
+      _id: { $in: videoIds },
+      channel: channel._id,
     });
 
-    // Add playlist to channel
-    channel.playlist.push(playlist._id);
-    await channel.save();
+    if (videos !== videoIds.length) {
+      return res.status(404).json({
+        success: false,
+        message: "Some videos not found in your channel",
+      });
+    }
+  }
 
-    res.status(201).json({
-        success: true,
-        message: "Playlist created successfully",
-        playlist,
-    });
+  // Create playlist
+  const playlist = await Playlist.create({
+    channel: channel._id,
+    title,
+    description,
+    thumbnail,
+    visibility,
+    video: videoIds,
+  });
+
+  // Add playlist to channel
+  channel.playlist.push(playlist._id);
+  await channel.save();
+
+  res.status(201).json({
+    success: true,
+    message: "Playlist created successfully",
+    playlist,
+  });
 });
 
 export const toggleSavePlaylist = asyncHandler(async (req, res) => {
@@ -91,3 +91,27 @@ export const toggleSavePlaylist = asyncHandler(async (req, res) => {
     playlist,
   });
 });
+
+export const getSavedPlaylist = asyncHandler(async (req, res) => {
+  const userId = req.userId;
+
+  const savedPlayLists = await Playlist.find({ saveBy: userId })
+    .populate("video")
+    .populate({
+      path: "video",
+      populate: { path: "channel" }
+    })
+
+  if (savedPlayLists.length === 0) {
+    return res.status(404).json({
+      success: false,
+      message: "No saved playlist found"
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: "Saved playlist fetched successfully",
+    savedPlayLists
+  });
+})

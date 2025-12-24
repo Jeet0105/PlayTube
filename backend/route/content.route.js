@@ -3,7 +3,7 @@ import { verifyUser } from "../middleware/verifyUser.js";
 import { addComment, addReply, createVideo, getAllVideos, getLikedVideo, getSavedVideos, incrementView, toggleDislike, toggleLike, toggleSave } from "../controller/video.controller.js";
 import { uploadBoth } from '../middleware/multer.js';
 import { addCommentShort, addReplyShort, createShort, getAllShorts, getLikedShort, getSavedShorts, getShortComments, incrementViewShort, toggleDislikeShort, toggleLikeShort, toggleSaveShort } from "../controller/short.controller.js";
-import { createPlaylist, toggleSavePlaylist } from "../controller/playlist.controller.js";
+import { createPlaylist, getSavedPlaylist, toggleSavePlaylist } from "../controller/playlist.controller.js";
 import { addCommentPost, addReplyPost, CreatePost, getAllPosts, toggleLikePost } from "../controller/post.controller.js";
 
 const router = express.Router();
@@ -49,6 +49,7 @@ router.get("/getsavedshort", verifyUser, getSavedShorts);
 // PlayList Routes
 router.post("/create-playlist", verifyUser, createPlaylist);
 router.post("/playlist/save", verifyUser, toggleSavePlaylist);
+router.get("/getsavedplaylist", verifyUser, getSavedPlaylist);
 
 // Post Routes
 router.post(

@@ -27,6 +27,7 @@ export const API_ENDPOINTS = {
     UPDATE_CHANNEL: "/api/v1/user/updatechannel",
     SUBSCRIBE: "/api/v1/user/togglesubscribe",
     GET_ALL_CHANNEL: "/api/v1/user/allchannel",
+    GET_SUBSCRIBED_DATA : "/api/v1/user/subscribed-data",
   },
   CONTENT: {
     Create_Video: "/api/v1/content/create-video",
@@ -56,6 +57,7 @@ export const API_ENDPOINTS = {
     GET_LIKED_SHORT: "/api/v1/content/getlikedshort",
     GET_SAVED_VIDEO: "/api/v1/content/getsavedvideo",
     GET_SAVED_SHORT: "/api/v1/content/getsavedshort",
+    GET_SAVED_PLAYLIST: "/api/v1/content/getsavedplaylist",
   }
 };
 
