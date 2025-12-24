@@ -15,7 +15,7 @@ import { IoIosAddCircle } from "react-icons/io";
 
 import logo from "../../public/logo.png";
 import { useState, useMemo, useCallback, memo, lazy } from "react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Profile from "../component/Profile";
 import PageShell from "../component/PageShell";
@@ -33,7 +33,7 @@ function Home() {
 
     const navigate = useNavigate();
     const location = useLocation();
-    const { userData } = useSelector((state) => state.user);
+    const { userData, subscribedChannels } = useSelector((state) => state.user);
 
     // Memoize categories to prevent re-creation on every render
     const categories = useMemo(() => CATEGORIES, []);
@@ -155,10 +155,11 @@ function Home() {
 
                         <SidebarItem
                             icon={<MdOutlineSubscriptions />}
-                            text="Subscriptions"
+                            text="Subscription"
                             open={sidebarOpen}
                             selected={selectedItem}
                             setSelected={setSelectedItem}
+                            onClick={() => userData && navigate("/subscription")}
                         />
                     </nav>
 
@@ -184,7 +185,7 @@ function Home() {
                             open={sidebarOpen}
                             selected={selectedItem}
                             setSelected={setSelectedItem}
-                            onClick={() => !userData && navigate("/")}
+                            onClick={() => userData && navigate("/savedplaylist")}
                         />
                         <SidebarItem
                             icon={<GoVideo />}
@@ -202,6 +203,31 @@ function Home() {
                             setSelected={setSelectedItem}
                             onClick={() => userData && navigate("/likedcontent")}
                         />
+                    </nav>
+
+                    <div className="my-4 border-t border-white/10"></div>
+
+                    {/* subscribed channels */}
+                    <nav>
+                        {sidebarOpen && (
+                            <p className="text-sm text-gray-400 px-3 mb-2">Subscribed</p>
+                        )}
+
+                        <div className="space-y-1 mt-1">
+                            {subscribedChannels?.map((ch)=>(
+                                <Link
+                                    key={ch._id}
+                                    to={`/channelpage/${ch._id}`}
+                                    onClick={()=>setSelectedItem(ch?._id)}
+                                    className={`flex items-center ${sidebarOpen?"gap-3 justify-start": "justify-center"} w-full text-left cursor-pointer p-2 rounded-lg transition ${selectedItem===ch._id? "bg-[#272727]" : "hover:bg-gray-800" }`}
+                                >
+                                    <img src={ch?.avatar} alt={ch.name} className="w-6 h-6 rounded-full border border-gray-700 object-cover hover:scale-110 transition-transform duration-200" />
+                                    {sidebarOpen && (
+                                        <span className="text-sm text-white truncate">{ch?.name}</span>
+                                    )}
+                                </Link>
+                            ))}
+                        </div>
                     </nav>
                 </aside >
 
@@ -277,7 +303,10 @@ function Home() {
                         icon={<MdOutlineSubscriptions />}
                         text="Subs"
                         active={selectedItem === "Subscriptions"}
-                        onClick={() => setSelectedItem("Subscriptions")}
+                        onClick={() => {
+                            setSelectedItem("Subscriptions");
+                            navigate("/subscription");
+                        }}
                     />
 
                     <MobileSizeNav

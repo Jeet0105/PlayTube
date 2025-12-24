@@ -125,7 +125,7 @@ function MobileProfile() {
                     <>
                         <div className="flex flex-col mt-4 gap-1 px-2">
                             <ProfileMenuItem icon={<FaHistory />} label="History" />
-                            <ProfileMenuItem icon={<FaList />} label="Playlist" />
+                            <ProfileMenuItem icon={<FaList />} label="Playlist" onClick={() => navigate("/savedplaylist")} />
                             <ProfileMenuItem icon={<GoVideo />} label="Saved Videos" onClick={() => navigate("/savedcontent")} />
                             <ProfileMenuItem icon={<FaThumbsUp />} label="Liked Videos" onClick={() => navigate("/likedcontent")} />
                             {userData?.channel && (

@@ -312,3 +312,48 @@ export const getAllChannelData = asyncHandler(async (req, res) => {
         channels,
     });
 });
+
+export const getSubscribedData = asyncHandler(async (req, res) => {
+    const userId = req.userId;
+
+    const subscribedChannels = await Channel.find({ subscribers: userId })
+        .populate({
+            path: "video",
+            populate: { path: "channel", select: "name avatar" }
+        })
+        .populate({
+            path: "shorts",
+            populate: { path: "channel", select: "name avatar" }
+        })
+        .populate({
+            path: "playlist",
+            populate: { path: "channel", select: "name avatar" },
+            populate: { path: "video", populate: { path: "channel" } }
+        })
+        .populate({
+            path: "communityPosts",
+            populate: { path: "channel", select: "name avatar" }
+        })
+
+    if (!subscribedChannels || subscribedChannels.length === 0) {
+        return res.status(404).json({
+            success: false,
+            message: "No channel subscribed"
+        });
+    }
+
+    const videos = subscribedChannels.flatMap((ch => ch.video));
+    const shorts = subscribedChannels.flatMap((ch => ch.shorts));
+    const posts = subscribedChannels.flatMap((ch => ch.communityPosts));
+    const playlist = subscribedChannels.flatMap((ch => ch.playlist));
+
+    return res.status(200).json({
+        success: true,
+        message: "Retrived Sucessfully",
+        subscribedChannels,
+        videos,
+        shorts,
+        posts,
+        playlist
+    })
+});
