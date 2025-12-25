@@ -21,6 +21,7 @@ import { toast } from "react-toastify";
 import api from "../../utils/axios";
 import { API_ENDPOINTS } from "../../utils/constants";
 import LoadingSpinner from "../../components/LoadingSpinner";
+import { use } from "react";
 
 function PlayVideo() {
     const videoRef = useRef(null);
@@ -321,6 +322,23 @@ function PlayVideo() {
             setReplyLoading(false);
         }
     };
+
+    useEffect(() => {
+        document.title = video ? `${video.title} - PlayTube` : "PlayTube";
+        const addHistory = async () => {
+            try {
+                await api.post(API_ENDPOINTS.USER.ADD_HISTORY, { 
+                    contentId: videoId,
+                    contentType: "Video"
+                });                
+            } catch (error) {
+                console.error("Failed to add history:", error);
+            }
+        };
+        if (videoId) {
+            addHistory();
+        }
+    }, [videoId, video]);
 
     return (
         <div className="flex bg-[#0f0f0f] text-white flex-col lg:flex-row gap-6 p-4 lg:p-6 min-h-screen">
