@@ -1,5 +1,5 @@
 import express from "express";
-import { createChannel, getAllChannelData, getChannelData, getCurrentUser, getSubscribedData, toggleSubscribe, updateChannel } from "../controller/user.controller.js";
+import { addHistory, createChannel, getAllChannelData, getChannelData, getCurrentUser, getHistory, getSubscribedData, toggleSubscribe, updateChannel } from "../controller/user.controller.js";
 import { verifyUser } from "../middleware/verifyUser.js";
 import { uploadBoth } from "../middleware/multer.js";
 
@@ -17,6 +17,8 @@ router.put("/updatechannel", verifyUser, uploadBoth.fields([
 ]), updateChannel);
 router.post("/togglesubscribe",verifyUser,toggleSubscribe);
 router.get("/allchannel",verifyUser,getAllChannelData);
-router.get("/subscribed-data",verifyUser,getSubscribedData)
+router.get("/subscribed-data",verifyUser,getSubscribedData);
+router.post("/add-history",verifyUser, addHistory);
+router.get("/get-history",verifyUser, getHistory);
 
 export default router;
