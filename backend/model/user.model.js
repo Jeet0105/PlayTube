@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { type } from "os";
 
 const userSchema = new mongoose.Schema(
   {
@@ -42,7 +43,7 @@ const userSchema = new mongoose.Schema(
     },
     resetOtp: { 
       type: String,
-      select: false, // Don't include in queries by default
+      select: false,
     },
     otpExpires: { 
       type: Date,
@@ -57,6 +58,23 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    history: [
+      {
+        contentId:{
+          type: mongoose.Schema.Types.ObjectId,
+          refPath: "history.contentType" //will dynamically decide video/short
+        },
+        contentType: {
+          type: String,
+          enum:["Video","Short"],
+          required: true,
+        },
+        watchedAt: {
+          type: Date,
+          default: Date.now
+        }
+      }
+    ],
   },
   { timestamps: true }
 );

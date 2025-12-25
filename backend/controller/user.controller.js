@@ -2,6 +2,9 @@ import uploadOnCloudinary from "../config/cloudinary.js";
 import Channel from "../model/channel.model.js";
 import User from "../model/user.model.js";
 import { asyncHandler } from "../middleware/errorHandler.js";
+import Video from "../model/video.model.js"
+import Short from "../model/short.model.js"
+import mongoose from "mongoose";
 
 export const getCurrentUser = asyncHandler(async (req, res) => {
     const userId = req.userId;
@@ -356,4 +359,121 @@ export const getSubscribedData = asyncHandler(async (req, res) => {
         posts,
         playlist
     })
+});
+
+export const addHistory = asyncHandler(async (req, res) => {
+  const userId = req.userId;
+  const { contentId, contentType } = req.body;
+
+  if (!userId) {
+    return res.status(401).json({
+      success: false,
+      message: "Unauthorized",
+    });
+  }
+
+  if (!["Video", "Short"].includes(contentType)) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid contentType",
+    });
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(contentId)) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid contentId",
+    });
+  }
+
+  const objectId = new mongoose.Types.ObjectId(contentId);
+  const Model = contentType === "Video" ? Video : Short;
+
+  const content = await Model.findById(objectId);
+  if (!content) {
+    return res.status(404).json({
+      success: false,
+      message: `${contentType} not found`,
+    });
+  }
+
+  await User.findByIdAndUpdate(
+    userId,
+    [
+      // remove old entry if exists
+      {
+        $set: {
+          history: {
+            $filter: {
+              input: "$history",
+              as: "h",
+              cond: {
+                $not: {
+                  $and: [
+                    { $eq: ["$$h.contentId", objectId] },
+                    { $eq: ["$$h.contentType", contentType] },
+                  ],
+                },
+              },
+            },
+          },
+        },
+      },
+      // push the latest view to the end
+      {
+        $set: {
+          history: {
+            $concatArrays: [
+              "$history",
+              [
+                {
+                  contentId: objectId,
+                  contentType,
+                  watchedAt: new Date(),
+                },
+              ],
+            ],
+          },
+        },
+      },
+    ],
+    { new: true }
+  );
+
+  return res.status(200).json({
+    success: true,
+    message: "Added to history",
+  });
+});
+
+export const getHistory = asyncHandler(async (req, res) => {
+  const userId = req.userId;
+
+  const user = await User.findById(userId)
+    .populate({
+      path: "history.contentId",
+      populate: {
+        path: "channel",
+        select: "name avatar",
+      },
+    })
+    .select("history")
+    .lean();
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found",
+    });
+  }
+
+  const sortedHistory = [...user.history].sort(
+    (a, b) => new Date(b.watchedAt) - new Date(a.watchedAt)
+  );
+
+  return res.status(200).json({
+    success: true,
+    message: "History fetched",
+    userHistory: sortedHistory,
+  });
 });
