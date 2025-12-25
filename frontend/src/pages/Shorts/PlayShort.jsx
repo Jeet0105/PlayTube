@@ -278,6 +278,23 @@ function PlayShort() {
         }
     };
 
+    useEffect(() => {
+        const addShortToHistory = async () => {
+            try {
+                await api.post(
+                    API_ENDPOINTS.USER.ADD_HISTORY, {
+                    contentId: shortId,
+                    contentType: "Short"
+                });
+            } catch (error) {
+                console.error("Error adding short to history:", error);
+            }
+        };
+        if (shortId) {
+            addShortToHistory();
+        }
+    }, [shortId]);
+
     return (
         <div className="h-screen w-full bg-black overflow-y-scroll snap-y snap-mandatory scrollbar-hide">
             {shortList.map((short) => {
@@ -327,9 +344,9 @@ function PlayShort() {
                                         src={short?.channel?.avatar}
                                         alt={short?.channel?.name}
                                         className="w-8 h-8 rounded-full border border-gray-600"
-                                        onClick={()=>navigate(`/channelpage/${short?.channel?._id}`)}
+                                        onClick={() => navigate(`/channelpage/${short?.channel?._id}`)}
                                     />
-                                    <span onClick={()=>navigate(`/channelpage/${short?.channel?._id}`)} className="font-semibold text-gray-200">
+                                    <span onClick={() => navigate(`/channelpage/${short?.channel?._id}`)} className="font-semibold text-gray-200">
                                         @{short?.channel?.name}
                                     </span>
                                     <button

@@ -28,6 +28,8 @@ export const API_ENDPOINTS = {
     SUBSCRIBE: "/api/v1/user/togglesubscribe",
     GET_ALL_CHANNEL: "/api/v1/user/allchannel",
     GET_SUBSCRIBED_DATA : "/api/v1/user/subscribed-data",
+    ADD_HISTORY : "/api/v1/user/add-history",
+    GET_HISTORY : "/api/v1/user/get-history",
   },
   CONTENT: {
     Create_Video: "/api/v1/content/create-video",

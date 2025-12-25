@@ -362,118 +362,119 @@ export const getSubscribedData = asyncHandler(async (req, res) => {
 });
 
 export const addHistory = asyncHandler(async (req, res) => {
-  const userId = req.userId;
-  const { contentId, contentType } = req.body;
+    const userId = req.userId;
+    const { contentId, contentType } = req.body;
 
-  if (!userId) {
-    return res.status(401).json({
-      success: false,
-      message: "Unauthorized",
-    });
-  }
+    if (!userId) {
+        return res.status(401).json({
+            success: false,
+            message: "Unauthorized",
+        });
+    }
 
-  if (!["Video", "Short"].includes(contentType)) {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid contentType",
-    });
-  }
+    if (!["Video", "Short"].includes(contentType)) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid contentType",
+        });
+    }
 
-  if (!mongoose.Types.ObjectId.isValid(contentId)) {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid contentId",
-    });
-  }
+    if (!mongoose.Types.ObjectId.isValid(contentId)) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid contentId",
+        });
+    }
 
-  const objectId = new mongoose.Types.ObjectId(contentId);
-  const Model = contentType === "Video" ? Video : Short;
+    const objectId = new mongoose.Types.ObjectId(contentId);
+    const Model = contentType === "Video" ? Video : Short;
 
-  const content = await Model.findById(objectId);
-  if (!content) {
-    return res.status(404).json({
-      success: false,
-      message: `${contentType} not found`,
-    });
-  }
+    const content = await Model.findById(objectId);
+    if (!content) {
+        return res.status(404).json({
+            success: false,
+            message: `${contentType} not found`,
+        });
+    }
 
-  await User.findByIdAndUpdate(
-    userId,
-    [
-      // remove old entry if exists
-      {
-        $set: {
-          history: {
-            $filter: {
-              input: "$history",
-              as: "h",
-              cond: {
-                $not: {
-                  $and: [
-                    { $eq: ["$$h.contentId", objectId] },
-                    { $eq: ["$$h.contentType", contentType] },
-                  ],
-                },
-              },
+    await User.findByIdAndUpdate(
+        userId,
+        [
+            {
+                $set: {
+                    history: {
+                        $filter: {
+                            input: "$history",
+                            as: "h",
+                            cond: {
+                                $not: {
+                                    $and: [
+                                        { $eq: ["$$h.contentId", objectId] },
+                                        { $eq: ["$$h.contentType", contentType] },
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
             },
-          },
-        },
-      },
-      // push the latest view to the end
-      {
-        $set: {
-          history: {
-            $concatArrays: [
-              "$history",
-              [
-                {
-                  contentId: objectId,
-                  contentType,
-                  watchedAt: new Date(),
-                },
-              ],
-            ],
-          },
-        },
-      },
-    ],
-    { new: true }
-  );
+            {
+                $set: {
+                    history: {
+                        $concatArrays: [
+                            "$history",
+                            [
+                                {
+                                    contentId: objectId,
+                                    contentType,
+                                    watchedAt: new Date(),
+                                }
+                            ]
+                        ]
+                    }
+                }
+            }
+        ],
+        {
+            new: true,
+            updatePipeline: true
+        }
+    );
 
-  return res.status(200).json({
-    success: true,
-    message: "Added to history",
-  });
+    return res.status(200).json({
+        success: true,
+        message: "Added to history",
+    });
 });
 
 export const getHistory = asyncHandler(async (req, res) => {
-  const userId = req.userId;
+    const userId = req.userId;
 
-  const user = await User.findById(userId)
-    .populate({
-      path: "history.contentId",
-      populate: {
-        path: "channel",
-        select: "name avatar",
-      },
-    })
-    .select("history")
-    .lean();
+    const user = await User.findById(userId)
+        .populate({
+            path: "history.contentId",
+            populate: {
+                path: "channel",
+                select: "name avatar",
+            },
+        })
+        .select("history")
+        .lean();
 
-  if (!user) {
-    return res.status(404).json({
-      success: false,
-      message: "User not found",
+    if (!user) {
+        return res.status(404).json({
+            success: false,
+            message: "User not found",
+        });
+    }
+
+    const sortedHistory = [...user.history].sort(
+        (a, b) => new Date(b.watchedAt) - new Date(a.watchedAt)
+    );
+
+    return res.status(200).json({
+        success: true,
+        message: "History fetched",
+        userHistory: sortedHistory,
     });
-  }
-
-  const sortedHistory = [...user.history].sort(
-    (a, b) => new Date(b.watchedAt) - new Date(a.watchedAt)
-  );
-
-  return res.status(200).json({
-    success: true,
-    message: "History fetched",
-    userHistory: sortedHistory,
-  });
 });

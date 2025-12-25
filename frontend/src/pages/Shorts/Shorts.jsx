@@ -38,6 +38,7 @@ function Shorts() {
     const [newComment, setNewComment] = useState("");
     const [showReply, setShowReply] = useState({});
     const [replyText, setReplyText] = useState({});
+    const [shortId, setShortId] = useState(null);
 
     const videoRefs = useRef({});
     const currentVideoRef = useRef(null);
@@ -70,6 +71,10 @@ function Shorts() {
                         video.play().catch(() => { });
                         currentVideoRef.current = video;
                         setPlayingState((p) => ({ ...p, [id]: true }));
+
+                        // Increment view count
+                        incrementView(id);
+                        setShortId(id);
                     } else {
                         video.pause();
                         setPlayingState((p) => ({ ...p, [id]: false }));
@@ -269,6 +274,23 @@ function Shorts() {
             toast.error("Try again!!");
         }
     };
+
+    useEffect(() => {
+            const addShortToHistory = async () => {
+                try {
+                    await api.post(
+                        API_ENDPOINTS.USER.ADD_HISTORY, {
+                        contentId: shortId,
+                        contentType: "Short"
+                    });
+                } catch (error) {
+                    console.error("Error adding short to history:", error);
+                }
+            };
+            if (shortId) {
+                addShortToHistory();
+            }
+        }, [shortId]);
 
     return (
         <div className="h-screen w-full bg-black overflow-y-scroll snap-y snap-mandatory scrollbar-hide">
