@@ -177,7 +177,7 @@ function Home() {
                             open={sidebarOpen}
                             selected={selectedItem}
                             setSelected={setSelectedItem}
-                            onClick={() => !userData && navigate("/")}
+                            onClick={() => userData && navigate("/history")}
                         />
                         <SidebarItem
                             icon={<FaList />}

@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: function() {
+      required: function () {
         // Password not required for Google OAuth users
         return !this.isGoogleUser;
       },
@@ -41,16 +41,16 @@ const userSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Channel",
     },
-    resetOtp: { 
+    resetOtp: {
       type: String,
       select: false,
     },
-    otpExpires: { 
+    otpExpires: {
       type: Date,
       select: false,
     },
-    isOtpVerified: { 
-      type: Boolean, 
+    isOtpVerified: {
+      type: Boolean,
       default: false,
       select: false,
     },
@@ -58,23 +58,26 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    history: [
-      {
-        contentId:{
-          type: mongoose.Schema.Types.ObjectId,
-          refPath: "history.contentType" //will dynamically decide video/short
-        },
-        contentType: {
-          type: String,
-          enum:["Video","Short"],
-          required: true,
-        },
-        watchedAt: {
-          type: Date,
-          default: Date.now
+    history: {
+      type: [
+        {
+          contentId: {
+            type: mongoose.Schema.Types.ObjectId,
+            refPath: "history.contentType"
+          },
+          contentType: {
+            type: String,
+            enum: ["Video", "Short"],
+            required: true
+          },
+          watchedAt: {
+            type: Date,
+            default: Date.now
+          }
         }
-      }
-    ],
+      ],
+      default: []
+    },
   },
   { timestamps: true }
 );
@@ -85,7 +88,7 @@ userSchema.index({ username: 1 });
 userSchema.index({ channel: 1 });
 
 // Remove password from JSON output
-userSchema.methods.toJSON = function() {
+userSchema.methods.toJSON = function () {
   const obj = this.toObject();
   delete obj.password;
   delete obj.resetOtp;
