@@ -5,6 +5,7 @@ import { uploadBoth } from '../middleware/multer.js';
 import { addCommentShort, addReplyShort, createShort, getAllShorts, getLikedShort, getSavedShorts, getShortComments, incrementViewShort, toggleDislikeShort, toggleLikeShort, toggleSaveShort } from "../controller/short.controller.js";
 import { createPlaylist, getSavedPlaylist, toggleSavePlaylist } from "../controller/playlist.controller.js";
 import { addCommentPost, addReplyPost, CreatePost, getAllPosts, toggleLikePost } from "../controller/post.controller.js";
+import { searchWithAI } from "../controller/ai.controller.js";
 
 const router = express.Router();
 
@@ -62,6 +63,9 @@ router.get("/getPosts", getAllPosts);
 router.post("/post/like", toggleLikePost);
 router.post("/post/comments", verifyUser, addCommentPost);
 router.post("/post/comments/replies", verifyUser, addReplyPost);
+
+// AI Routes
+router.post("/search", verifyUser, searchWithAI);
 
 
 export default router;
