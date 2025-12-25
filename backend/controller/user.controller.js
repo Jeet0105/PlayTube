@@ -365,85 +365,66 @@ export const addHistory = asyncHandler(async (req, res) => {
     const userId = req.userId;
     const { contentId, contentType } = req.body;
 
-    if (!userId) {
-        return res.status(401).json({
-            success: false,
-            message: "Unauthorized",
-        });
-    }
+    if (!userId)
+        return res.status(401).json({ success: false, message: "Unauthorized" });
 
-    if (!["Video", "Short"].includes(contentType)) {
-        return res.status(400).json({
-            success: false,
-            message: "Invalid contentType",
-        });
-    }
+    if (!["Video", "Short"].includes(contentType))
+        return res.status(400).json({ success: false, message: "Invalid contentType" });
 
-    if (!mongoose.Types.ObjectId.isValid(contentId)) {
-        return res.status(400).json({
-            success: false,
-            message: "Invalid contentId",
-        });
-    }
+    if (!mongoose.Types.ObjectId.isValid(contentId))
+        return res.status(400).json({ success: false, message: "Invalid contentId" });
 
     const objectId = new mongoose.Types.ObjectId(contentId);
     const Model = contentType === "Video" ? Video : Short;
 
     const content = await Model.findById(objectId);
-    if (!content) {
-        return res.status(404).json({
-            success: false,
-            message: `${contentType} not found`,
-        });
-    }
+    if (!content)
+        return res.status(404).json({ success: false, message: `${contentType} not found` });
 
-    await User.findByIdAndUpdate(
-        userId,
+    await User.updateOne(
+        { _id: userId },
         [
             {
                 $set: {
                     history: {
-                        $filter: {
-                            input: "$history",
-                            as: "h",
-                            cond: {
-                                $not: {
-                                    $and: [
-                                        { $eq: ["$$h.contentId", objectId] },
-                                        { $eq: ["$$h.contentType", contentType] },
-                                    ]
-                                }
+                        $let: {
+                            vars: { hist: { $ifNull: ["$history", []] } },
+                            in: {
+                                $concatArrays: [
+                                    [
+                                        {
+                                            contentId: objectId,
+                                            contentType,
+                                            watchedAt: new Date()
+                                        }
+                                    ],
+                                    {
+                                        $filter: {
+                                            input: "$$hist",
+                                            as: "item",
+                                            cond: {
+                                                $not: {
+                                                    $and: [
+                                                        { $eq: ["$$item.contentId", objectId] },
+                                                        { $eq: ["$$item.contentType", contentType] }
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    }
+                                ]
                             }
                         }
                     }
                 }
-            },
-            {
-                $set: {
-                    history: {
-                        $concatArrays: [
-                            "$history",
-                            [
-                                {
-                                    contentId: objectId,
-                                    contentType,
-                                    watchedAt: new Date(),
-                                }
-                            ]
-                        ]
-                    }
-                }
             }
         ],
-        {
-            new: true,
-            updatePipeline: true
-        }
+        { updatePipeline: true }
     );
 
     return res.status(200).json({
         success: true,
-        message: "Added to history",
+        message: "Added to history"
     });
 });
 
@@ -468,7 +449,9 @@ export const getHistory = asyncHandler(async (req, res) => {
         });
     }
 
-    const sortedHistory = [...user.history].sort(
+    const history = Array.isArray(user?.history) ? user.history : [];
+
+    const sortedHistory = [...history].sort(
         (a, b) => new Date(b.watchedAt) - new Date(a.watchedAt)
     );
 

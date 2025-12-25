@@ -10,6 +10,7 @@ import GetCurrentUser from "./customHooks/GetCurrentUser";
 import GetChannelData from "./customHooks/GetChannelData";
 import GetAllContentData from "./customHooks/GetAllContentData";
 import GetSubscribedData from "./customHooks/GetSubscribedData"
+import GetHistory from "./customHooks/GetHistory";
 
 // Lazy load components for code splitting
 const Home = lazy(() => import("./pages/Home"));
@@ -33,12 +34,14 @@ const LikdedContent = lazy(()=>import("./pages/LikdedContent"))
 const SavedContent = lazy(()=>import("./pages/SavedContent"))
 const SavedPlayList = lazy(()=>import("./pages/Playlist/SavedPlayList"))
 const Subscription = lazy(()=>import("./pages/Subscription"))
+const HistoryContent = lazy(()=>import("./pages/HistoryContent"))
 
 function App() {
   GetCurrentUser();
   GetChannelData();
   GetAllContentData();
   GetSubscribedData();
+  GetHistory();
 
   return (
     <ErrorBoundary>
@@ -65,6 +68,7 @@ function App() {
             <Route path="savedcontent" element={<ProtectRoute><SavedContent /></ProtectRoute>} />
             <Route path="savedplaylist" element={<ProtectRoute><SavedPlayList /></ProtectRoute>} />
             <Route path="subscription" element={<ProtectRoute><Subscription /></ProtectRoute>} />
+            <Route path="history" element={<ProtectRoute><HistoryContent /></ProtectRoute>} />
           </Route>
 
           {/* Protected Routes */}
