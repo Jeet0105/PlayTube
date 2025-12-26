@@ -30,6 +30,7 @@ export const API_ENDPOINTS = {
     GET_SUBSCRIBED_DATA: "/api/v1/user/subscribed-data",
     ADD_HISTORY: "/api/v1/user/add-history",
     GET_HISTORY: "/api/v1/user/get-history",
+    GET_RECOMMENDATION: "/api/v1/user/recommended-content"
   },
   CONTENT: {
     Create_Video: "/api/v1/content/create-video",

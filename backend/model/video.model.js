@@ -120,6 +120,8 @@ videoSchema.index({ title: "text", description: "text" });
 videoSchema.index({ views: -1 });
 videoSchema.index({ createdAt: -1 });
 videoSchema.index({ likeCount: -1 });
+videoSchema.index({ tags: 1 });
+videoSchema.index({ title: "text", description: "text" });
 
 const Video = mongoose.model("Video", videoSchema);
 export default Video;

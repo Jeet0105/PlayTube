@@ -13,6 +13,7 @@ const userSlice = createSlice({
         subscribedPlaylists: null,
         videoHistory: null,
         shortHistory: null,
+        recommendedContent: null,
     },
     reducers: {
         setUserData: (state, action) => {
@@ -45,19 +46,23 @@ const userSlice = createSlice({
         setShortHistory: (state, action) => {
             state.shortHistory = action.payload;
         },
+        setRecommendedContent: (state, action) => {
+            state.recommendedContent = action.payload;
+        },
     }
 });
 
-export const { 
-    setUserData, 
-    setChannelData, 
-    setAllChannelData, 
-    setSubscribedChannels, 
-    setSubscribedPlaylists, 
-    setSubscribedPosts, 
-    setSubscribedShorts, 
-    setSubscribedVideos ,
+export const {
+    setUserData,
+    setChannelData,
+    setAllChannelData,
+    setSubscribedChannels,
+    setSubscribedPlaylists,
+    setSubscribedPosts,
+    setSubscribedShorts,
+    setSubscribedVideos,
     setVideoHistory,
-    setShortHistory
+    setShortHistory,
+    setRecommendedContent,
 } = userSlice.actions;
 export default userSlice.reducer;

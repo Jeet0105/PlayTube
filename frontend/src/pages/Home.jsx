@@ -24,6 +24,7 @@ import { API_ENDPOINTS, CATEGORIES } from "../utils/constants";
 import { toast } from "react-toastify";
 import api from "../utils/axios";
 import SearchResults from "../component/SearchResults";
+import RecommendedContent from "./RecommendedContent";
 
 const AllVideosPage = lazy(() => import("../component/AllVideosPage"));
 const AllShortsPage = lazy(() => import("../component/AllShortsPage"));
@@ -447,8 +448,14 @@ function Home() {
                                 {filteredData && (
                                     <SearchResults searchResults={filteredData} />
                                 )}
-                                < AllVideosPage />
-                                <AllShortsPage />
+                                {userData ?
+                                    <RecommendedContent />
+                                    :
+                                    <>
+                                        < AllVideosPage />
+                                        <AllShortsPage />
+                                    </>
+                                }
                             </div>
                         </>
                     )}

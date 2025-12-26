@@ -121,6 +121,8 @@ shortSchema.index({ title: "text", description: "text" });
 shortSchema.index({ views: -1 });
 shortSchema.index({ createdAt: -1 });
 shortSchema.index({ likeCount: -1 });
+shortSchema.index({ tags: 1 });
+shortSchema.index({ title: "text", description: "text" });
 
 const Short = mongoose.model("Short", shortSchema);
 export default Short;

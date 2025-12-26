@@ -11,6 +11,7 @@ import GetChannelData from "./customHooks/GetChannelData";
 import GetAllContentData from "./customHooks/GetAllContentData";
 import GetSubscribedData from "./customHooks/GetSubscribedData"
 import GetHistory from "./customHooks/GetHistory";
+import { GetRecommendedContent } from "./customHooks/GetRecommendedContent";
 
 // Lazy load components for code splitting
 const Home = lazy(() => import("./pages/Home"));
@@ -42,6 +43,7 @@ function App() {
   GetAllContentData();
   GetSubscribedData();
   GetHistory();
+  GetRecommendedContent();
 
   return (
     <ErrorBoundary>
