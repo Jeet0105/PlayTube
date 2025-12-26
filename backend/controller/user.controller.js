@@ -461,3 +461,160 @@ export const getHistory = asyncHandler(async (req, res) => {
         userHistory: sortedHistory,
     });
 });
+
+// H = history size
+// L = liked + saved count
+// V = total videos in DB
+// S = total shorts in DB
+// Rv = recommended videos returned
+// Rs = recommended shorts returned
+// O(H + L + Rv + Rs) for fetching data and processing
+// O(V) + O(S) in worst case for remaining content fetch
+export const getRecommendedContent = asyncHandler(async (req, res) => {
+    const userId = req.userId;
+
+    const user = await User.findById(userId)
+        .populate("history.contentId", "title tags")
+        .lean();
+
+    if (!user) {
+        return res.status(404).json({
+            success: false,
+            message: "User not found"
+        });
+    }
+
+    /* -------------------- helpers -------------------- */
+
+    const STOP_WORDS = new Set([
+        "the", "to", "is", "and", "of", "in", "for", "on", "with", "how"
+    ]);
+
+    const extractKeywords = (texts = []) =>
+        texts
+            .flatMap(t => t.toLowerCase().split(/\s+/))
+            .filter(w => w.length > 3 && !STOP_WORDS.has(w));
+
+    /* -------------------- history -------------------- */
+
+    const history = Array.isArray(user.history) ? user.history : [];
+
+    const historyTitles = history
+        .map(h => h.contentId?.title)
+        .filter(Boolean);
+
+    const historyTags = history.flatMap(h => h.contentId?.tags || []);
+
+    /* -------------------- liked & saved -------------------- */
+
+    const [
+        likedVideos,
+        savedVideos,
+        likedShorts,
+        savedShorts
+    ] = await Promise.all([
+        Video.find({ likes: userId }).select("_id tags"),
+        Video.find({ saveBy: userId }).select("_id tags"),
+        Short.find({ likes: userId }).select("_id tags"),
+        Short.find({ saveBy: userId }).select("_id tags")
+    ]);
+
+    /* -------------------- exclude interacted IDs -------------------- */
+
+    const interactedVideoIds = [
+        ...history.filter(h => h.contentType === "Video").map(h => h.contentId?._id),
+        ...likedVideos.map(v => v._id),
+        ...savedVideos.map(v => v._id)
+    ].filter(Boolean);
+
+    const interactedShortIds = [
+        ...history.filter(h => h.contentType === "Short").map(h => h.contentId?._id),
+        ...likedShorts.map(s => s._id),
+        ...savedShorts.map(s => s._id)
+    ].filter(Boolean);
+
+    /* -------------------- keywords -------------------- */
+
+    const rawKeywords = [
+        ...extractKeywords(historyTitles),
+        ...historyTags
+    ];
+
+    const keywords = [...new Set(rawKeywords)].slice(0, 10);
+
+    /* -------------------- recommended queries -------------------- */
+
+    const videoRecommendQuery = {
+        _id: { $nin: interactedVideoIds },
+        visibility: "public",
+        ...(keywords.length && {
+            $or: [
+                { tags: { $in: keywords } },
+                { $text: { $search: keywords.join(" ") } }
+            ]
+        })
+    };
+
+    const shortRecommendQuery = {
+        _id: { $nin: interactedShortIds },
+        ...(keywords.length && { tags: { $in: keywords } })
+    };
+
+    /* -------------------- fetch recommended -------------------- */
+
+    const [recommendedVideos, recommendedShorts] = await Promise.all([
+        Video.find(videoRecommendQuery)
+            .sort({ createdAt: -1 })
+            .select("title thumbnail channel views likeCount createdAt")
+            .populate("channel", "name avatar"),
+
+        Short.find(shortRecommendQuery)
+            .sort({ createdAt: -1 })
+            .select("title channel views createdAt")
+            .populate("channel", "name avatar")
+    ]);
+
+    /* -------------------- remaining content -------------------- */
+
+    const recommendedVideoIds = recommendedVideos.map(v => v._id);
+    const recommendedShortIds = recommendedShorts.map(s => s._id);
+
+    const remainingVideoQuery = {
+        _id: {
+            $nin: [...interactedVideoIds, ...recommendedVideoIds]
+        },
+        visibility: "public"
+    };
+
+    const remainingShortQuery = {
+        _id: {
+            $nin: [...interactedShortIds, ...recommendedShortIds]
+        }
+    };
+
+    const [remainingVideos, remainingShorts] = await Promise.all([
+        Video.find(remainingVideoQuery)
+            .sort({ createdAt: -1 })
+            .select("title thumbnail channel views likeCount createdAt")
+            .populate("channel", "name avatar"),
+
+        Short.find(remainingShortQuery)
+            .sort({ createdAt: -1 })
+            .select("title channel views createdAt")
+            .populate("channel", "name avatar")
+    ]);
+
+    /* -------------------- response -------------------- */
+
+    res.status(200).json({
+        success: true,
+        message: "Recommended content fetched",
+        data: {
+            recommendedVideos,
+            recommendedShorts,
+            remainingVideos,
+            remainingShorts
+        },
+        usedKeywords: keywords
+    });
+});

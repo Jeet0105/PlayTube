@@ -38,6 +38,7 @@ function Home() {
     const [searchQuery, setSearchQuery] = useState("");
     const [loading, setLoading] = useState(false);
     const [searchData, setSearchData] = useState();
+    const [filteredData, setFilteredData] = useState("");
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -92,7 +93,7 @@ function Home() {
             setSearchQuery(transcript);
             setListing(false);
             recognitionRef.current.stop();
-            
+
             // Pass transcript directly to bypass async state update lag
             await handleSrcData(transcript);
         };
@@ -154,6 +155,45 @@ function Home() {
         }
     };
 
+    const handleCategoryFilter = async (category) => {
+        setLoading(true);
+        try {
+            const res = await api.post(API_ENDPOINTS.CONTENT.AI_FILTER, {
+                input: category
+            });
+            const { videos = [], shorts = [], channels = [] } = res.data;
+
+            let channelVideos = [];
+            let channelShorts = [];
+
+            channels.forEach((channel) => {
+                if (channel.video?.length)
+                    channelVideos.push(...channel.video);
+                if (channel.short?.length)
+                    channelShorts.push(...channel.short);
+            });
+
+            setFilteredData({
+                ...res.data,
+                videos: [...videos, ...channelVideos],
+                shorts: [...shorts, ...channelShorts]
+            });
+            if (videos.length > 0 || shorts.length > 0 || channelVideos.length > 0 || channelShorts.length > 0) {
+                speak(`Found matching results for ${category}.`);
+            } else {
+                speak(`No results found for ${category}.`);
+            }
+            console.log(filteredData);
+
+        } catch (error) {
+            console.log(error);
+            toast.error("Failed to filter by category.Try again.");
+        } finally {
+            setLoading(false);
+            navigate("/");
+        }
+
+    }
     return (
         <PageShell variant="app" padded={false} className="text-white">
             <div className="relative min-h-screen">
@@ -173,11 +213,11 @@ function Home() {
                                 ) : (
                                     <h1 className="text-xl sm:text-2xl font-semibold text-gray-300">
                                         Speak now or type your search
-                                    </h1>    
+                                    </h1>
                                 )}
 
                                 {searchQuery && (
-                                    <span className="text-center text-lg sm:text-xl text-gray-300 px-4 py-2 rounded-lg bg-[#2a2a2a]/60 break-words w-full">
+                                    <span className="text-center text-lg sm:text-xl text-gray-300 px-4 py-2 rounded-lg bg-[#2a2a2a]/60 wrap-break-word w-full">
                                         {searchQuery}
                                     </span>
                                 )}
@@ -216,7 +256,7 @@ function Home() {
                                 <FaBars />
                             </button>
 
-                            <div className="flex items-center gap-[6px] cursor-pointer" onClick={() => navigate("/")}>
+                            <div className="flex items-center gap-1.5 cursor-pointer" onClick={() => navigate("/")}>
                                 <img src={logo} alt="Logo" className="w-10" />
                                 <span className="text-white font-bold text-xl tracking-tight">
                                     PlayTube
@@ -391,9 +431,9 @@ function Home() {
                                 {categories.map((category) => (
                                     <button
                                         key={category}
-                                        onClick={() => handleCategoryClick(category)}
+                                        onClick={() => { handleCategoryClick(category); handleCategoryFilter(category) }}
                                         className={`px-4 py-2 rounded-full text-sm whitespace-nowrap transition-all duration-200 font-medium
-                                ${activeCategory === category
+                                                ${activeCategory === category
                                                 ? "bg-white text-black shadow-lg"
                                                 : "bg-[#272727] hover:bg-[#3a3a3a] text-gray-300"}`}
                                         aria-label={`Filter by ${category}`}
@@ -404,7 +444,10 @@ function Home() {
                             </div>
                             <div className="mt-3">
                                 {searchData && <SearchResults searchResults={searchData} />}
-                                <AllVideosPage />
+                                {filteredData && (
+                                    <SearchResults searchResults={filteredData} />
+                                )}
+                                < AllVideosPage />
                                 <AllShortsPage />
                             </div>
                         </>

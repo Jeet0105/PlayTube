@@ -27,9 +27,9 @@ export const API_ENDPOINTS = {
     UPDATE_CHANNEL: "/api/v1/user/updatechannel",
     SUBSCRIBE: "/api/v1/user/togglesubscribe",
     GET_ALL_CHANNEL: "/api/v1/user/allchannel",
-    GET_SUBSCRIBED_DATA : "/api/v1/user/subscribed-data",
-    ADD_HISTORY : "/api/v1/user/add-history",
-    GET_HISTORY : "/api/v1/user/get-history",
+    GET_SUBSCRIBED_DATA: "/api/v1/user/subscribed-data",
+    ADD_HISTORY: "/api/v1/user/add-history",
+    GET_HISTORY: "/api/v1/user/get-history",
   },
   CONTENT: {
     Create_Video: "/api/v1/content/create-video",
@@ -61,30 +61,17 @@ export const API_ENDPOINTS = {
     GET_SAVED_SHORT: "/api/v1/content/getsavedshort",
     GET_SAVED_PLAYLIST: "/api/v1/content/getsavedplaylist",
     AI_SEARCH: "/api/v1/content/search",
+    AI_FILTER: "/api/v1/content/filter",
   }
 };
 
 // Categories
 export const CATEGORIES = [
-  "All",
-  "Music",
-  "Gaming",
-  "News",
-  "Movies",
-  "Sports",
-  "Learning",
-  "Fashion & Beauty",
-  "TV Shows",
-  "Trending",
-  "Live",
-  "Comedy",
-  "Entertainment",
-  "Education",
-  "Science & Technology",
-  "Art",
-  "Cooking",
-  "Travel",
-  "Autos & Vehicles",
+  "Education", "Music", "Sports", "Gaming", "News", "Entertainment", "Movies", "Technology", "Lifestyle",
+  "TV Shows", "News", "Comedy", "Travel", "Food", "Vlogs", "Documentary", "Arts", "Science", "Health",
+  "Fitness", "Fashion", "Automotive", "Animals", "History", "Business", "Finance", "DIY", "How-to",
+  "Animation", "Kids", "Podcasts", "ASMR", "Meditation", "Motivational", "Spirituality",
+  "Cooking", "Crafts", "Photography", "Nature", "Environment", "Politics", "Culture", "Comedy", "Other"
 ];
 
 // File upload limits
