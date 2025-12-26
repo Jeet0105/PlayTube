@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { API_ENDPOINTS } from "../../utils/constants";
-import api from "../utils/axios";
+import api from "../../utils/axios";
 import { FaList } from "react-icons/fa"
 import PlaylistCard from "../../component/PlaylistCard";
 

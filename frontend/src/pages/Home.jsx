@@ -7,6 +7,7 @@ import {
     FaHistory,
     FaList,
     FaThumbsUp,
+    FaTimes,
 } from "react-icons/fa";
 import { GoVideo } from "react-icons/go";
 import { SiYoutubeshorts } from "react-icons/si";
@@ -14,31 +15,36 @@ import { MdOutlineSubscriptions } from "react-icons/md";
 import { IoIosAddCircle } from "react-icons/io";
 
 import logo from "../../public/logo.png";
-import { useState, useMemo, useCallback, memo, lazy } from "react";
+import { useState, useMemo, useCallback, memo, lazy, useRef } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Profile from "../component/Profile";
 import PageShell from "../component/PageShell";
-import { CATEGORIES } from "../utils/constants";
+import { API_ENDPOINTS, CATEGORIES } from "../utils/constants";
+import { toast } from "react-toastify";
+import api from "../utils/axios";
+import SearchResults from "../component/SearchResults";
 
 const AllVideosPage = lazy(() => import("../component/AllVideosPage"));
 const AllShortsPage = lazy(() => import("../component/AllShortsPage"));
-
 
 function Home() {
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [selectedItem, setSelectedItem] = useState("Home");
     const [activeCategory, setActiveCategory] = useState("All");
     const [profileOpen, setProfileOpen] = useState(false);
+    const [searchPopUp, setSearchPopUp] = useState(false);
+    const [listing, setListing] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [searchData, setSearchData] = useState();
 
     const navigate = useNavigate();
     const location = useLocation();
     const { userData, subscribedChannels } = useSelector((state) => state.user);
 
-    // Memoize categories to prevent re-creation on every render
     const categories = useMemo(() => CATEGORIES, []);
 
-    // Memoize handlers to prevent unnecessary re-renders
     const toggleSidebar = useCallback(() => {
         setSidebarOpen(prev => !prev);
     }, []);
@@ -53,9 +59,148 @@ function Home() {
 
     const isHomePage = useMemo(() => location.pathname === "/", [location.pathname]);
 
+    const recognitionRef = useRef();
+
+    if (typeof window !== "undefined" && !recognitionRef.current && (window.SpeechRecognition || window.webkitSpeechRecognition)) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = "en-US";
+
+        recognitionRef.current = recognition;
+    }
+
+    // --- UPDATED SPEECH HANDLER ---
+    const handleSearch = async () => {
+        if (!recognitionRef.current) {
+            toast.error("Speech Recognition not supported in this browser.");
+            return;
+        }
+        if (listing) {
+            recognitionRef.current.stop();
+            setListing(false);
+            return;
+        }
+
+        setListing(true);
+        setSearchQuery(""); // Clear input before listening
+        recognitionRef.current.start();
+
+        recognitionRef.current.onresult = async (e) => {
+            const transcript = e.results[0][0].transcript.trim();
+            setSearchQuery(transcript);
+            setListing(false);
+            recognitionRef.current.stop();
+            
+            // Pass transcript directly to bypass async state update lag
+            await handleSrcData(transcript);
+        };
+
+        recognitionRef.current.onerror = (e) => {
+            console.error("Speech recognition error:", e.error);
+            setListing(false);
+            if (e.error === "not-allowed" || e.error === "service-not-allowed") {
+                toast.error("Permission to use microphone denied.");
+            } else if (e.error === "no-speech") {
+                toast.error("No speech detected.");
+            } else {
+                toast.error("Speech recognition error. Try again.");
+            }
+        };
+
+        recognitionRef.current.onend = () => {
+            setListing(false);
+        };
+    };
+
+    function speak(message) {
+        let utterance = new SpeechSynthesisUtterance(message);
+        utterance.lang = "en-US";
+        window.speechSynthesis.speak(utterance);
+    }
+
+    // --- UPDATED DATA FETCH HANDLER ---
+    const handleSrcData = async (manualInput) => {
+        // Use manualInput (from speech) or searchQuery (from typing)
+        const finalInput = typeof manualInput === 'string' ? manualInput : searchQuery;
+
+        if (!finalInput) {
+            toast.warn("Please enter a search term.");
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const res = await api.post(API_ENDPOINTS.CONTENT.AI_SEARCH, {
+                input: finalInput
+            });
+            setSearchData(res.data);
+            setSearchPopUp(false);
+
+            const { videos = [], shorts = [], channels = [], playlists = [] } = res.data;
+
+            if (videos.length > 0 || shorts.length > 0 || channels.length > 0 || playlists.length > 0) {
+                speak("Found matching results.");
+            } else {
+                speak("No results found.");
+            }
+        } catch (error) {
+            toast.error("Failed to fetch search results.");
+            console.error("Error fetching search data:", error);
+        } finally {
+            setLoading(false);
+            setSearchQuery("");
+        }
+    };
+
     return (
         <PageShell variant="app" padded={false} className="text-white">
             <div className="relative min-h-screen">
+
+                {searchPopUp && (
+                    <div className="fixed inset-0 bg-black/70 bg-opacity-75 flex items-center justify-center z-50 animate-fadeIn p-4">
+                        <div className="bg-[#1f1f1f]/90 backdrop-blur-md rounded-2xl shadow-2xl w-[90%] max-w-md min-h-[400px] sm:min-h-[480px] p-8 flex flex-col items-center justify-between gap-8 relative border border-gray-700 transition-all duration-300">
+                            <button className="absolute top-4 right-4 text-gray-400 hover:text-white transition" onClick={() => setSearchPopUp(false)} aria-label="Close search popup">
+                                <FaTimes size={22} />
+                            </button>
+
+                            <div className="flex flex-col items-center gap-3 w-full">
+                                {listing ? (
+                                    <h1 className="text-xl sm:text-2xl font-semibold text-orange-400 animate-pulse">
+                                        Listening...
+                                    </h1>
+                                ) : (
+                                    <h1 className="text-xl sm:text-2xl font-semibold text-gray-300">
+                                        Speak now or type your search
+                                    </h1>    
+                                )}
+
+                                {searchQuery && (
+                                    <span className="text-center text-lg sm:text-xl text-gray-300 px-4 py-2 rounded-lg bg-[#2a2a2a]/60 break-words w-full">
+                                        {searchQuery}
+                                    </span>
+                                )}
+
+                                <div className="flex items-center gap-2 w-full md:hidden mt-4">
+                                    <input
+                                        type="text" className="flex-1 px-4 py-2 rounded-full bg-[#2a2a2a] text-white outline-none border border-gray-600 focus:border-orange-400 focus:ring-2 focus:ring-orange-500 transition"
+                                        placeholder="Search"
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        value={searchQuery}
+                                    />
+                                    <button onClick={() => handleSrcData()} disabled={loading} className="bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded-full text-white font-semibold shadow-md transition disabled:opacity-50">
+                                        <FaSearch />
+                                    </button>
+                                </div>
+
+                                <button onClick={handleSearch} className={`p-6 rounded-full shadow-xl transition-all duration-300 transform hover:scale-110 ${listing ? 'bg-orange-600 animate-pulse ring-4 ring-orange-500/30' : 'bg-amber-500 hover:bg-orange-600 shadow-orange-500/40'}`}>
+                                    <FaMicrophone size={48} className="text-white" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Header */}
                 <header className="bg-[#0f0f0f]/95 backdrop-blur-xl h-16 px-4 border-b border-white/10 fixed top-0 left-0 right-0 z-50">
@@ -86,12 +231,15 @@ function Home() {
                                     type="text"
                                     placeholder="Search"
                                     className="flex-1 bg-[#121212] px-4 py-2 rounded-l-full border border-gray-700 focus:border-gray-500 outline-none transition"
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    value={searchQuery}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleSrcData()}
                                 />
-                                <button className="bg-[#272727] px-5 rounded-r-full border border-gray-700 hover:bg-[#3a3a3a] transition">
+                                <button onClick={() => handleSrcData()} disabled={loading} className="bg-[#272727] px-5 rounded-r-full border border-gray-700 hover:bg-[#3a3a3a] transition disabled:opacity-50">
                                     <FaSearch />
                                 </button>
                             </div>
-                            <button className="bg-[#272727] p-3 rounded-full hover:bg-[#3a3a3a] transition">
+                            <button className="bg-[#272727] p-3 rounded-full hover:bg-[#3a3a3a] transition" onClick={() => setSearchPopUp(!searchPopUp)}>
                                 <FaMicrophone />
                             </button>
                         </div>
@@ -117,10 +265,11 @@ function Home() {
                                     <img src={userData?.profilePictureUrl} alt="User" className="w-8 h-8 rounded-full hidden md:flex cursor-pointer" />
                                 )}
                             </div>
-                            <FaSearch className="text-xl md:hidden flex cursor-pointer" />
+                            <FaSearch className="text-xl md:hidden flex cursor-pointer" onClick={() => setSearchPopUp(!searchPopUp)} />
                         </div>
                     </div>
                 </header >
+
                 {/* Sidebar */}
                 < aside
                     className={`bg-[#0f0f0f]/95 backdrop-blur-xl border-r border-white/10 fixed top-16 bottom-0 left-0 z-40
@@ -214,12 +363,12 @@ function Home() {
                         )}
 
                         <div className="space-y-1 mt-1">
-                            {subscribedChannels?.map((ch)=>(
+                            {subscribedChannels?.map((ch) => (
                                 <Link
                                     key={ch._id}
                                     to={`/channelpage/${ch._id}`}
-                                    onClick={()=>setSelectedItem(ch?._id)}
-                                    className={`flex items-center ${sidebarOpen?"gap-3 justify-start": "justify-center"} w-full text-left cursor-pointer p-2 rounded-lg transition ${selectedItem===ch._id? "bg-[#272727]" : "hover:bg-gray-800" }`}
+                                    onClick={() => setSelectedItem(ch?._id)}
+                                    className={`flex items-center ${sidebarOpen ? "gap-3 justify-start" : "justify-center"} w-full text-left cursor-pointer p-2 rounded-lg transition ${selectedItem === ch._id ? "bg-[#272727]" : "hover:bg-gray-800"}`}
                                 >
                                     <img src={ch?.avatar} alt={ch.name} className="w-6 h-6 rounded-full border border-gray-700 object-cover hover:scale-110 transition-transform duration-200" />
                                     {sidebarOpen && (
@@ -254,6 +403,7 @@ function Home() {
                                 ))}
                             </div>
                             <div className="mt-3">
+                                {searchData && <SearchResults searchResults={searchData} />}
                                 <AllVideosPage />
                                 <AllShortsPage />
                             </div>
@@ -328,15 +478,12 @@ function Home() {
     );
 }
 
-/* Sidebar Component */
 const SidebarItem = memo(({ icon, text, open, selected, setSelected, onClick }) => {
     const isActive = selected === text;
-
     const handleClick = () => {
         setSelected(text);
         if (onClick) onClick();
     };
-
     return (
         <button
             onClick={handleClick}
@@ -353,7 +500,6 @@ const SidebarItem = memo(({ icon, text, open, selected, setSelected, onClick }) 
 
 SidebarItem.displayName = "SidebarItem";
 
-/* Mobile Nav Component */
 const MobileSizeNav = memo(({ icon, text, onClick, active }) => {
     return (
         <button

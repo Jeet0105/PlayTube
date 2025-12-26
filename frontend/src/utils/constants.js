@@ -60,6 +60,7 @@ export const API_ENDPOINTS = {
     GET_SAVED_VIDEO: "/api/v1/content/getsavedvideo",
     GET_SAVED_SHORT: "/api/v1/content/getsavedshort",
     GET_SAVED_PLAYLIST: "/api/v1/content/getsavedplaylist",
+    AI_SEARCH: "/api/v1/content/search",
   }
 };
 
