@@ -471,150 +471,96 @@ export const getHistory = asyncHandler(async (req, res) => {
 // O(H + L + Rv + Rs) for fetching data and processing
 // O(V) + O(S) in worst case for remaining content fetch
 export const getRecommendedContent = asyncHandler(async (req, res) => {
-    const userId = req.userId;
+  const userId = req.userId;
 
-    const user = await User.findById(userId)
-        .populate("history.contentId", "title tags")
-        .lean();
+  // 1️⃣ Get user + history
+  const user = await User.findById(userId)
+    .populate("history.contentId", "title description tags")
+    .lean();
 
-    if (!user) {
-        return res.status(404).json({
-            success: false,
-            message: "User not found"
-        });
-    }
+  if (!user) {
+    return res.status(404).json({ success: false, message: "User not found" });
+  }
 
-    /* -------------------- helpers -------------------- */
+  // 2️⃣ Interaction Extraction (Crucial for $nin)
+  // We convert everything to String to ensure comparison works perfectly
+  const likedV = await Video.find({ likes: userId }).distinct("_id");
+  const savedV = await Video.find({ saveBy: userId }).distinct("_id");
+  const likedS = await Short.find({ likes: userId }).distinct("_id");
+  const savedS = await Short.find({ saveBy: userId }).distinct("_id");
 
-    const STOP_WORDS = new Set([
-        "the", "to", "is", "and", "of", "in", "for", "on", "with", "how"
-    ]);
+  const history = user.history || [];
+  
+  const interactedVideoIds = [
+    ...history.filter(h => h.contentType === "Video").map(h => h.contentId?._id),
+    ...likedV,
+    ...savedV
+  ].filter(Boolean).map(id => id.toString());
 
-    const extractKeywords = (texts = []) =>
-        texts
-            .flatMap(t => t.toLowerCase().split(/\s+/))
-            .filter(w => w.length > 3 && !STOP_WORDS.has(w));
+  const interactedShortIds = [
+    ...history.filter(h => h.contentType === "Short").map(h => h.contentId?._id),
+    ...likedS,
+    ...savedS
+  ].filter(Boolean).map(id => id.toString());
 
-    /* -------------------- history -------------------- */
+  // Unique arrays of interacted IDs
+  const finalExclV = [...new Set(interactedVideoIds)];
+  const finalExclS = [...new Set(interactedShortIds)];
 
-    const history = Array.isArray(user.history) ? user.history : [];
+  // 3️⃣ Keyword Building
+  const STOP_WORDS = new Set(["the","to","is","and","of","in","for","a","on","how","with","you","your","this"]);
+  
+  const extract = (text) => String(text || "").toLowerCase().split(/\W+/).filter(w => w.length > 2 && !STOP_WORDS.has(w));
 
-    const historyTitles = history
-        .map(h => h.contentId?.title)
-        .filter(Boolean);
+  const rawKeywords = [
+    ...history.flatMap(h => extract(h.contentId?.title)),
+    ...history.flatMap(h => extract(h.contentId?.description)),
+    ...history.flatMap(h => (h.contentId?.tags || []).map(t => t.toLowerCase().replace(/^#/, "")))
+  ];
 
-    const historyTags = history.flatMap(h => h.contentId?.tags || []);
+  const keywords = [...new Set(rawKeywords)].filter(Boolean);
 
-    /* -------------------- liked & saved -------------------- */
+  // 4️⃣ FETCHING LOGIC
+  const queryOptions = (excludedIds) => ({
+    _id: { $nin: excludedIds },
+    visibility: "public" // Use public strictly, or remove if ignoring visibility
+  });
 
-    const [
-        likedVideos,
-        savedVideos,
-        likedShorts,
-        savedShorts
-    ] = await Promise.all([
-        Video.find({ likes: userId }).select("_id tags"),
-        Video.find({ saveBy: userId }).select("_id tags"),
-        Short.find({ likes: userId }).select("_id tags"),
-        Short.find({ saveBy: userId }).select("_id tags")
-    ]);
+  // A. Recommended by Tags
+  let recommendedVideos = [];
+  let recommendedShorts = [];
 
-    /* -------------------- exclude interacted IDs -------------------- */
+  if (keywords.length > 0) {
+    recommendedVideos = await Video.find({
+      ...queryOptions(finalExclV),
+      tags: { $in: keywords }
+    }).populate("channel", "name avatar").limit(20).lean();
 
-    const interactedVideoIds = [
-        ...history.filter(h => h.contentType === "Video").map(h => h.contentId?._id),
-        ...likedVideos.map(v => v._id),
-        ...savedVideos.map(v => v._id)
-    ].filter(Boolean);
+    recommendedShorts = await Short.find({
+      ...queryOptions(finalExclS),
+      tags: { $in: keywords }
+    }).populate("channel", "name avatar").limit(20).lean();
+  }
 
-    const interactedShortIds = [
-        ...history.filter(h => h.contentType === "Short").map(h => h.contentId?._id),
-        ...likedShorts.map(s => s._id),
-        ...savedShorts.map(s => s._id)
-    ].filter(Boolean);
+  // B. Remaining / New (Everything else user hasn't seen)
+  const recVIds = recommendedVideos.map(v => v._id.toString());
+  const recSIds = recommendedShorts.map(s => s._id.toString());
 
-    /* -------------------- keywords -------------------- */
+  let remainingVideos = await Video.find({
+    ...queryOptions([...finalExclV, ...recVIds])
+  }).sort({ createdAt: -1 }).populate("channel", "name avatar").limit(20).lean();
 
-    const rawKeywords = [
-        ...extractKeywords(historyTitles),
-        ...historyTags
-    ];
+  let remainingShorts = await Short.find({
+    ...queryOptions([...finalExclS, ...recSIds])
+  }).sort({ createdAt: -1 }).populate("channel", "name avatar").limit(20).lean();
 
-    const keywords = [...new Set(rawKeywords)].slice(0, 10);
-
-    /* -------------------- recommended queries -------------------- */
-
-    const videoRecommendQuery = {
-        _id: { $nin: interactedVideoIds },
-        visibility: "public",
-        ...(keywords.length && {
-            $or: [
-                { tags: { $in: keywords } },
-                { $text: { $search: keywords.join(" ") } }
-            ]
-        })
-    };
-
-    const shortRecommendQuery = {
-        _id: { $nin: interactedShortIds },
-        ...(keywords.length && { tags: { $in: keywords } })
-    };
-
-    /* -------------------- fetch recommended -------------------- */
-
-    const [recommendedVideos, recommendedShorts] = await Promise.all([
-        Video.find(videoRecommendQuery)
-            .sort({ createdAt: -1 })
-            .select("title thumbnail channel views likeCount createdAt")
-            .populate("channel", "name avatar"),
-
-        Short.find(shortRecommendQuery)
-            .sort({ createdAt: -1 })
-            .select("title channel views createdAt")
-            .populate("channel", "name avatar")
-    ]);
-
-    /* -------------------- remaining content -------------------- */
-
-    const recommendedVideoIds = recommendedVideos.map(v => v._id);
-    const recommendedShortIds = recommendedShorts.map(s => s._id);
-
-    const remainingVideoQuery = {
-        _id: {
-            $nin: [...interactedVideoIds, ...recommendedVideoIds]
-        },
-        visibility: "public"
-    };
-
-    const remainingShortQuery = {
-        _id: {
-            $nin: [...interactedShortIds, ...recommendedShortIds]
-        }
-    };
-
-    const [remainingVideos, remainingShorts] = await Promise.all([
-        Video.find(remainingVideoQuery)
-            .sort({ createdAt: -1 })
-            .select("title thumbnail channel views likeCount createdAt")
-            .populate("channel", "name avatar"),
-
-        Short.find(remainingShortQuery)
-            .sort({ createdAt: -1 })
-            .select("title channel views createdAt")
-            .populate("channel", "name avatar")
-    ]);
-
-    /* -------------------- response -------------------- */
-
-    res.status(200).json({
-        success: true,
-        message: "Recommended content fetched",
-        data: {
-            recommendedVideos,
-            recommendedShorts,
-            remainingVideos,
-            remainingShorts
-        },
-        usedKeywords: keywords
-    });
+  return res.status(200).json({
+    success: true,
+    data: {
+      recommendedVideos,
+      recommendedShorts,
+      remainingVideos,
+      remainingShorts
+    },
+  });
 });
