@@ -32,7 +32,7 @@ function Profile() {
                 navigate("/signin");
             }
         } catch (error) {
-            // Error is handled by axios interceptor
+            console.log(error);
         } finally {
             setIsSigningOut(false);
         }
@@ -112,7 +112,10 @@ function Profile() {
                     {userData && (
                         <>
                             {userData?.channel && (
-                                <button className='flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition cursor-pointer text-left'>
+                                <button
+                                    className='flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition cursor-pointer text-left'
+                                    onClick={()=> navigate("/ptstudio/dashboard")}
+                                >
                                     <SiYoutubestudio className='text-xl text-orange-500' />
                                     <span>PT Studio</span>
                                 </button>

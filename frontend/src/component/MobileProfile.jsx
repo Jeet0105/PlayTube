@@ -129,7 +129,7 @@ function MobileProfile() {
                             <ProfileMenuItem icon={<GoVideo />} label="Saved Videos" onClick={() => navigate("/savedcontent")} />
                             <ProfileMenuItem icon={<FaThumbsUp />} label="Liked Videos" onClick={() => navigate("/likedcontent")} />
                             {userData?.channel && (
-                                <ProfileMenuItem icon={<SiYoutubestudio className="text-orange-400" />} label="PT Studio" />
+                                <ProfileMenuItem onClick={navigate("/ptstudio/dashboard")} icon={<SiYoutubestudio className="text-orange-400" />} label="PT Studio" />
                             )}
                         </div>
                         <div className="h-px w-full bg-white/10 my-2" />

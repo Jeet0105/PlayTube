@@ -44,7 +44,6 @@ function CreatePage() {
     const handleCreate = () => {
         if (!selected) return;
 
-        // TODO: Navigate to appropriate creation page based on selected option
         switch (selected) {
             case "Video":
                 navigate("/create-video");
