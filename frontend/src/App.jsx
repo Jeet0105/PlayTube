@@ -29,13 +29,18 @@ const CreateShort = lazy(() => import("./pages/Shorts/CreateShort"))
 const CreatePlayList = lazy(() => import("./pages/Playlist/CreatePlayList"))
 const CreatePost = lazy(() => import("./pages/Post/CreatePost"))
 const PlayVideo = lazy(() => import("./pages/Video/PlayVideo"))
-const PlayShort = lazy(()=>import("./pages/Shorts/PlayShort"))
-const ChannelPage = lazy(()=>import("./pages/Channel/ChannelPage"))
-const LikdedContent = lazy(()=>import("./pages/LikdedContent"))
-const SavedContent = lazy(()=>import("./pages/SavedContent"))
-const SavedPlayList = lazy(()=>import("./pages/Playlist/SavedPlayList"))
-const Subscription = lazy(()=>import("./pages/Subscription"))
-const HistoryContent = lazy(()=>import("./pages/HistoryContent"))
+const PlayShort = lazy(() => import("./pages/Shorts/PlayShort"))
+const ChannelPage = lazy(() => import("./pages/Channel/ChannelPage"))
+const LikdedContent = lazy(() => import("./pages/LikdedContent"))
+const SavedContent = lazy(() => import("./pages/SavedContent"))
+const SavedPlayList = lazy(() => import("./pages/Playlist/SavedPlayList"))
+const Subscription = lazy(() => import("./pages/Subscription"))
+const HistoryContent = lazy(() => import("./pages/HistoryContent"))
+const PTStudio = lazy(() => import("./pages/PTStudio"))
+const Dashboard = lazy(() => import("./component/Dashboard"))
+const Content = lazy(() => import("./component/Content"))
+const Analytics = lazy(() => import("./component/Analytics"))
+const Revenue = lazy(() => import("./component/Revenue"))
 
 function App() {
   GetCurrentUser();
@@ -82,6 +87,14 @@ function App() {
           <Route path="/signup" element={<PublicRoute><SignUp /></PublicRoute>} />
           <Route path="/signin" element={<PublicRoute><SignIn /></PublicRoute>} />
           <Route path="/forgetpass" element={<ForgetPassword />} />
+
+          {/* Studio Routes */}
+          <Route path="/ptstudio" element={<ProtectRoute requireChannel><PTStudio /></ProtectRoute>} >
+            <Route path="dashboard" element={<ProtectRoute requireChannel><Dashboard /></ProtectRoute>} />
+            <Route path="analytics" element={<ProtectRoute requireChannel><Analytics /></ProtectRoute>} />
+            <Route path="content" element={<ProtectRoute requireChannel><Content /></ProtectRoute>} />
+            <Route path="revenue" element={<ProtectRoute requireChannel><Revenue /></ProtectRoute>} />
+          </Route>
         </Routes>
       </Suspense>
 

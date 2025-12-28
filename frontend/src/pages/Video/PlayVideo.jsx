@@ -21,7 +21,6 @@ import { toast } from "react-toastify";
 import api from "../../utils/axios";
 import { API_ENDPOINTS } from "../../utils/constants";
 import LoadingSpinner from "../../components/LoadingSpinner";
-import { use } from "react";
 
 function PlayVideo() {
     const videoRef = useRef(null);

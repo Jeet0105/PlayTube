@@ -161,6 +161,7 @@ function ViewChannel() {
                     </button>
                     <button 
                         className='bg-[#272727] hover:bg-[#3a3a3a] text-white px-5 py-2 rounded-full font-medium transition flex items-center gap-2'
+                        onClick={() => navigate('/ptstudio/dashboard')}
                     >
                         <FaVideo className='text-sm' />
                         Manage Videos
