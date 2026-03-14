@@ -47,6 +47,7 @@ function SignIn() {
         toast.error(res.data.message || "Signed in not successfully.Try again!!")
       }
     } catch (error) {
+      toast.error(error.response?.data?.message || "An error occurred during sign in. Please try again.");
       console.log(error);
     } finally {
       setLoading(false);
